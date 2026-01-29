@@ -190,7 +190,7 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 ![PHY View](Figures\phyview.png)
 
 **Figure3: Journey to Acceptance:Shows implementations of all the thresholding rules consecutively to obtain Single Units.**
-![Journey to Acceptance](Figures\JourneytoAcceptance.png)
+![Journey to Acceptance]([Figures\JourneytoAcceptance.png](https://github.com/BrendonWatsonLab/SpikeCleaner/blob/main/Figures/JourneytoAcceptance.png)
 
 ## Metrics of Match with Expert Users
 
@@ -231,3 +231,4 @@ Calculated Time: ~5.5 hours long.
 Special thanks to  the expert curators: Dr. Brendon Watson & Dr. Jeremiah Hartner.
 
 This work builds on open-source tools such as [Kilosort](https://github.com/MouseLand/Kilosort) and [Phy](https://github.com/cortex-lab/phy).
+
