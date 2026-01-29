@@ -12,7 +12,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
     disp(['Data file: ', datfil]);
     
     %% reading
-    [acgEvaluationMode, minHW, minAmp,maxAmp, minSlope, firingThreshold,acgallthreshold,acgmaxthreshold]=thresholds{:};
+    [acgEvaluationMode, minHW, minAmp,maxAmp, minSlope, firingThreshold,acgallthreshold,acgmaxthreshold,correlationthreshold]=thresholds{:};
     % Check if clufile is empty
     if isempty(clufile)
         error('clufile cannot be empty');
@@ -26,25 +26,12 @@ function dz_Curate(basename,datfil, clufile,thresholds)
 
     %% ACTIVE CHANENLS:  to only use the active channels
     % === Load rez to access channel map ===
-    rezFile = fullfile(a, 'rez.mat');
-    load(rezFile, 'rez');
+    param=fullfile(a,'parameters.mat');
+    load(param, 'parameters');
 
-    chanMap = double(rez.ops.chanMap);  % logical → physical mapping
-    if min(chanMap) == 0
-        chanMap = chanMap + 1;  % switch from 0-based to 1-based indexing
-    end
-    
-    connected = rez.connected(:);       % nchannels×1 logical
-    activeChannels = chanMap(connected);  % this is your final list of physical channels
-
-    % Map PHYSICAL IDs -> FILE COLUMNS (indices into rawBlock)
-    [tf, usedColumns] = ismember(activeChannels, chanMap);  % preserves order of activePhysical
-    usedColumns = usedColumns(tf);            % drop any non-matches just in case
-    assert(~isempty(usedColumns), 'No active channels matched chanMap');
-    nChannels = numel(usedColumns); %%active channels in use
-    fs=rez.ops.fs;%get from  rez.mat
-    totalChannels=rez.ops.NchanTOT;
-    parameters={totalChannels,fs};
+    nChannels = parameters.nChannels;
+    fs=parameters.samplingRate;
+    %parameters={totalChannels,fs};
 
     
     %% Load spike times
@@ -107,7 +94,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
 
  
     if ~exist(outputfile,'file')
-        [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck, usedColumns,parameters);  
+        [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters);  
         save(outputFileName, 'wf');
         dz_filterWaveform(outputFileName, outputfile,fs);
         wfdata=load(outputfile); 
@@ -395,7 +382,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
         corrValues = channelCorrelations{ix};
         corr=corrValues;
         totalChannels = length(corr); % Total number of remaining channels
-        numHighCorr = sum(corr > 0.95);
+        numHighCorr = sum(corr > correlationthreshold);
         percentHighCorr = (numHighCorr / totalChannels) * 100;
 
 
@@ -554,7 +541,6 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             end           
             % Final refined peak value
             avgPeak = mean(peakNeighborhood);
-            %avgPeak=;
             proportion=cchzero/avgPeak;  %proportion of  center  peaks  in  comparison to the shoulder of the  acg
     
             %%block  to  check  for noise using:ACG>>>  if all  center peaks  are >100%  of shoulder peaks
@@ -644,26 +630,32 @@ function dz_Curate(basename,datfil, clufile,thresholds)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% WRITING THE OUTPUT IN THE SAME FOLDER AS OF DATA TO BE READ BY PHY
     outputFile = fullfile(a, 'cluster_SpikeCleaner.tsv'); %%inside the animal  file
-
-    % Open the file for writing
-    fid = fopen(outputFile, 'wt');
-    if fid == -1
-        error('Cannot open file: %s', outputFile);
-    end 
-    fprintf(fid, 'cluster_id\tSpikeCleaner\tReasons\n');
     
-    for ix = 1:length(uclu)  % Loop over the actual cluster IDs (since uclu contains the cluster IDs)
-        cluster_index=uclu(ix);
-        passReason = Reasons{ix};
-        if isempty(passReason)
-            passReason = '';  % Default to " " if no specific reason provided
-        end
-        fprintf(fid, '%d\t(%s)\t%s\n', cluster_index, noiseReasons{ix},passReason);
-       
-    end
+    fid = fopen(fullfile(a,'cluster_SpikeCleaner.tsv'),'wt');
+    fprintf(fid,'cluster_id\tSpikeCleaner\r\n');     % header
 
+    for ix = 1:numel(uclu)
+        cluster_index = uclu(ix);
+        s = noiseReasons{ix};                        % a single string/char
+        s = regexprep(s,'\r?\n',' ');               % remove any embedded newlines
+        fprintf(fid,'%d\t%s\r\n',cluster_index,s);  % CRLF so Excel/Windows behave
+    end
     fclose(fid);
-    disp('Finished processing');
+    
+    %% WRITING THE OUTPUT IN THE SAME FOLDER AS OF DATA TO BE READ BY PHY
+    outputFile = fullfile(a, 'cluster_Spikereasons.tsv'); %%inside the animal  file
+    fid = fopen(fullfile(a,'cluster_Spikereasons.tsv'),'wt');
+    fprintf(fid,'cluster_id\tReasons\r\n');
+
+    for ix = 1:numel(uclu)
+        cluster_index = uclu(ix);
+        s = Reasons{ix};
+        if isempty(s), s = ' '; end
+        s = regexprep(s,'\r?\n',' ');
+        fprintf(fid,'%d\t%s\r\n',cluster_index,s);  % two columns, new row each time
+    end
+    fclose(fid);
+
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%WRITING HALFWIDTHS 
     halfwidthfile=fullfile(a,'halfwidths.tsv' );

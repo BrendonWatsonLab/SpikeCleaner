@@ -1,20 +1,48 @@
-%%%%%%%%%this code is for comparing good vs rest
- %user labels [rename cluster_group.tsv from phy to cluster_group.Username.tsv]
- %change its column header from 'group' to 'Usernamegroup'
-group = readtable("cluster_group_Username.tsv", 'FileType', 'text', 'Delimiter', '\t');
-group1 =readtable("path to cluster_TIDEV1.tsv", 'FileType', 'text', 'Delimiter', '\t');%algorithm
+function dz_goodVsRest(curdir)
+%%By Diksha Zutshi
+%run first: to chnage the shame of the data folder to make it compatible.
+if nargin < 1 || isempty(curdir)
+    curdir=pwd;
+end    
+%%%%%%%%%this code is for comparing good vs rest: SU Vs Rest
+%%this will export a metrics.tsv for match or no match
+username=strtrim(lower(input('Enter the user name for the PHY display:','s')));
+group1 =readtable("cluster_SpikeCleaner.tsv", 'FileType', 'text', 'Delimiter', '\t');%spike cleaner outputs
+userlabels='cluster_group.tsv';
+renameduser=sprintf('cluster_group_%s.tsv',username);
+group= readtable(renameduser, 'FileType', 'text', 'Delimiter', '\t');
+ % Rename header "group" to "username_group"
+oldVar = 'group';
+newVar = sprintf('%s_group', username);
+if ~isfile(renameduser)    
+    if isfile(userlabels)
+        movefile(userlabels,renameduser); %renames the original tsv file
+        fprintf('renamed the user labels %s to %s \n',userlabels,renameduser);
+        %rename header name        
+        idx = strcmp(group.Properties.VariableNames, oldVar);
+        if any(idx)
+            group.Properties.VariableNames{idx} = newVar;
+        else
+            warning('Column "%s" not found.', oldVar);
+        end
 
+        % Write to new file
+        writetable(group, renameduser, 'FileType', 'text', 'Delimiter', '\t');
 
+        fprintf('Created %s with updated column header.\n', renameduser);
+    else
+        warning('Cant find cluster_group.tsv, please manually curate using PHY');
+    end    
+end
 % Cleaning up strings
-group.group = strtrim(lower(string(group.Usernamegroup))); %add the column header of user: from 'group-->groupUsername'
-group1.reason = strtrim(lower(erase(erase(string(group1.TideV1), '('), ')')));
+group1.SpikeCleaner = strtrim(lower(group1.SpikeCleaner));
 
 % Merge tables on cluster_id
 merged = innerjoin(group, group1, 'Keys', 'cluster_id');
 
 %labels: 1 = good, 0 = not good
-true_label = double(merged.group == "good");
-pred_label = double(merged.reason == "good");
+true_label = double(merged.(newVar) == "good");
+pred_label = double(merged.SpikeCleaner == "good");
 
 % Confusion matrix components
 TP = sum(true_label == 1 & pred_label == 1);
@@ -55,7 +83,7 @@ merged.fp_fn(true_label == 0 & pred_label == 1) = "FP";  % FP
 merged.fp_fn(true_label == 1 & pred_label == 0) = "FN";  % FN;
 
 resultTable = group1(:, {'cluster_id'});  
-resultTable.fp_fn = repmat("", height(resultTable), 1);
+resultTable.goodVsrest = repmat("", height(resultTable), 1);
 
 % index matchcing resultTable based on merged table  
 for i = 1:height(merged)
@@ -69,4 +97,8 @@ for i = 1:height(merged)
     end
 end
 % % === EXPORT FINAL RESULT
-writetable(resultTable, "Place  it in the data folder \metricsUsername.tsv", 'Delimiter', '\t', 'FileType', 'text');%metrics of match or no match
+%metrics of match or no match to be imported in PHY
+outFile = fullfile(pwd, sprintf('GoodvsRest_%s.tsv', username));
+writetable(resultTable, outFile, 'Delimiter', '\t', 'FileType', 'text');
+
+end

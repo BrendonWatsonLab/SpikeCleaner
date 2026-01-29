@@ -4,15 +4,32 @@ function dz_classifyAllUnits(thresholds)
 % - mainDir: path to the code folder
 % - thresholds: optional struct or cell array of thresholds
     
-    %addpath(genpath("D:\Whatson Lab\Klustakwik\Matlab\SpikeCleaner\HelperFunctions"));
-    % Detect .npy and .dat files
-    npyFiles = getAllExtFiles(pwd, 'npy', 1); % 1 = include subfolders
-    datFiles = getAllExtFiles(pwd, 'dat', 1);
-    basename = cellfun(@bz_BasenameFromBasepath, datFiles, 'UniformOutput', false);
-
+ 
+    %look for all kilosort files in SpikeCleaner folder
+    spikeCleaner=fullfile(pwd,'SpikeCleaner');
+    if isfolder(spikeCleaner)
+         % Detect .npy and .dat files
+        npyFiles = getAllExtFiles(spikeCleaner, 'npy', 0); % 1 = include subfolders
+        datFiles = getAllExtFiles(pwd, 'dat', 1);
+    else
+        error('Please run dz_runFirst.m to create SpikeCleaner Folder');
+    end    
+ 
+    [~,basename]=fileparts(pwd);
+    datfilematch=[basename '.dat'];
+   
+    matchIdx=find(contains(datFiles,datfilematch),1,'first');
+    if ~isempty(matchIdx)
+        datfile=datFiles{matchIdx};
+    else
+        %
+        error('Dat file isnt available: %s',datfilematch);      
+    end    
+    fname=datfile;
+    
     %Default thresholds
     defaultThresholds = {...
-        'strict', ...       % ACG evaluation mode ('strict' or 'lenient')
+        'lenient', ...      % ACG evaluation mode ('strict' or 'lenient')
         0.85, ...           % minHW: Half-width threshold in ms
         50, ...             % minAmp: Minimum amplitude in uV
         2000, ...           % maxAmp: Maximum amplitude in uV
@@ -20,37 +37,25 @@ function dz_classifyAllUnits(thresholds)
         0.05, ...           % firingThreshold: Minimum firing rate (Hz)
         0.8, ...            % acgallthreshold: Threshold for all center bins vs shoulder
         1.1 ...             % acgmaxthreshold: Threshold for any center bin vs shoulder
-    };
+        0.95                %correlation 
+   };
 
     % Use defaults if no thresholds provided
     if nargin < 2 || isempty(thresholds)
         thresholds = defaultThresholds;
     end
 
-    % Process .dat file
-    for i = 1:length(datFiles)
-        fname = datFiles{i};
+    %% Process .dat file
 
-        if exist(fname, 'file')
-            try
-                fprintf('Processing file: %s\n', fname);
+    fprintf('Processing file: %s\n', datfile);
 
-                % Find the corresponding spike_clusters.npy file
-                clusterfile = npyFiles(contains(npyFiles, 'spike_clusters'));
-                if isempty(clusterfile)
-                    warning('No spike_clusters.npy file found for %s. Skipping.', fname);
-                    continue;
-                end
-                clufile = clusterfile{1};  % Select the first match
+    % Find the corresponding spike_clusters.npy file
+    clusterfile = npyFiles(contains(npyFiles, 'spike_clusters'));
+    clufile = clusterfile{1};  % Select the first match
 
-                % Run curation
-                dz_Curate(basename,fname, clufile,thresholds)
+    % Run curation
+    dz_Curate(basename,fname, clufile,thresholds)
 
-                fprintf('Finished processing file: %s\n', fname);
-            catch ME
-                fprintf('Error processing file: %s\n', fname);
-                fprintf('Error: %s\n', ME.message);
-            end
-        end
-    end
+    fprintf('Finished processing file: %s\n', fname);
+
 end

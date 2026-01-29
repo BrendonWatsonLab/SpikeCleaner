@@ -1,19 +1,19 @@
-function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck, usedChannels,parameters)
+function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
     disp("Entered into sm_getWaveform");
     disp(['Size of clu: ', num2str(size(clu))]);
     disp(['Size of ts: ', num2str(size(ts))]);
     disp(['Size of clusters to analyze: ', num2str(size(clustersToCheck))]);
     %matFilename = outputFileName;
        
-    [totalChannelsInFile,samplingRate]=parameters{:};
+    nChannels=parameters.nChannels;
+    samplingRate=parameters.samplingRate;
    
     fid = fopen(datfil, 'r');
     if fid == -1
         error('Failed to open the .dat file.');
     end
   
-    %usedChannels = activeChannels;
-    nChannels = length(usedChannels);
+
    
     % Parameters for waveform extraction
     
@@ -75,9 +75,9 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck, usedChannels,pa
             numSamplesToRead = endIdx - startIdx + 1;
 
             % % Move the file pointer to the start of the desired section
-            fseek(fid, (startIdx - 1) * totalChannelsInFile * 2, 'bof');
-            rawBlock = fread(fid, [totalChannelsInFile, numSamplesToRead], 'int16')';
-            extractedData = rawBlock(:, usedChannels);
+            fseek(fid, (startIdx - 1) * nChannels * 2, 'bof');
+            rawBlock = fread(fid, [nChannels, numSamplesToRead], 'int16')';
+            extractedData = rawBlock;
 
             
             % Apply padding to keep the size consistent

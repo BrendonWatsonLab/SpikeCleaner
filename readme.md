@@ -19,6 +19,7 @@ SpikeCleaner reduces manual curation time by combining heuristic metrics (firing
 SpikeCleaner/
 ├── dz_classifyUnitsAll.m
 ├── dz_Curate.m
+├── dz_runFirst.m
 ├── HelperFunctions/
 │   ├── dz_getWaveform.m
 │   ├── dz_filterWaveform.m
@@ -30,9 +31,9 @@ SpikeCleaner/
 │   ├── bz_BasenameFromBasepath.m
 │   └── readNPY.m
 ├── AccuracyMetrics/  # Codes to compare user labels to TIDE created labels
-|   |── comparisonTSVs.m : Good/Single Units Vs Rest
-|   |── comparisonTSVallcategories.m : Comparing all categories Noise/Good/MUA
-|   └── comparisonTSV_NeuronalVSNonN.m : Comparing Neuronal (MUA+Single Units) Vs Non Neuronal(Noise)
+|   |── dz_goodVsRest.m : Good/Single Units Vs Rest
+|   |── dz_allCats.m : Comparing all categories Noise/Good/MUA
+|   └── dz_neuronalvsNN.m : Comparing Neuronal (MUA+Single Units) Vs Non Neuronal(Noise)
 └── readme.md
 ```
 
@@ -42,27 +43,32 @@ SpikeCleaner/
 git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ```
 ## Setup
-- In **dz_classifyUnitsAll** update  the main directory location to where you place SpikeCluster.
-- CD to  you data folder and run SpikeCluster through there.
-- Make sure you have run spike sorting before hand and **dat file, spike_clusters.npy,spike_times.npy,rez.mat** are available in your data folder.
-- To be able to  run the comparison codes in  **AccuracyMetrics**, manually curate with PHY and rename the **cluster_group.tsv**  from PHY to **cluster_group_Username.tsv** and  rename the column header  from **group** to **Usernamegroup**.
+- After running Spike Sorting, CD to  you data folder.
+- Add SpikeCleaner folder to path in MATLAB: **addpath(genpath('path'))**
+- Run **dz_runFirst**: This will create a folder for SpikeCleaner in your data folder, and copy all the necessary files in that from all the subfodlers:**dat file, spike_clusters.npy,spike_times.npy, channel_map.npy,channel_positions.npy, pc_features.npy, templates.npy, spike_templates.npy, whitening_mat.npy,whitening_mat_inv.npy,similar_templates.npy,params.py ** and craetes **parameters.mat** containing information like number channels, sampling rate and animal name.
+- Run **dz_classifyUnitsAll()**.
 - Thresholds are pre-set but can be updated. We have made two versions available: **lenient** and **strict**. 
 - The first  time you run the code, it  is going to create mat files for filtered waveforms and ACGs,which might take some time, and then use them for every consecutive run.
+- To be able to  run the comparison codes in  **AccuracyMetrics**, manually curate with PHY in SpikeCleaner folder and then call functions for  **dz_goodVsRest(), dz_allCats(),dz_neuronalvsN()** which will ask you to enter your name, it's necessary for display in PHY for you to compare between your's and SpikeCleaner's labels. It will output Metrics files which will prompt Match/No Match between your's and SpikeCleaners labelling and which will also be imported in PHY and can be used to navigate.
 
 ## Dependencies & Requirements
 
 ### Inputs
 - `spike_clusters.npy` (Output from Kilosort)
 - `spike_times.npy` (Output from Kilosort)
-- `rez.mat` (Output from Kilosort)
-- `cluster_group_Username.tsv` (Rename 'cluster_group.tsv' file,Output from PHY)
+- `parameters.mat` (Output from dz_runFirst())
+- `cluster_group.tsv` (PHY manual curation labels)
 
 ### Outputs
 - `cluster_SpikeCleaner.tsv`
+- `cluster_Spikereasons.tsv`
 - `halfwidths.tsv`
 - `slopes.tsv`
 - `correlation.tsv`
 - `amplitudes.tsv`
+- `GoodvsRest_username.tsv`
+- `allcat_username.tsv`
+- `NvsNN_username.tsv`
 
 ## Features
 
@@ -81,7 +87,7 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ## Pipeline Flow
 
 ### Main Entry Point
-- **`dz_classifyUnitsAll.m`**: Call this using the path to main directory where the code resides, add the thresholds and run. If no thresholds are not provided it will run on default thresholds. 
+- **`dz_classifyUnitsAll.m`**: Call this from your data folder, add the thresholds and run. If no thresholds are not provided it will run on default thresholds. 
 
 **Default Values**:
 acgEvaluationMode='lenient' or 'strict'
@@ -160,7 +166,7 @@ This is the first function that is called upon:
 ## Outputs
 
 ### TSV Files (Data folder)
-All TSV file outputs (`cluster_SpikeCleaner.tsv`, `halfwidths.tsv`, `slopes.tsv`, `correlation.tsv`, `amplitudes.tsv`) are created in the Data folder, which is required to be able to access in PHY.
+All TSV file outputs (`cluster_SpikeCleaner.tsv`, `cluster_Spikereasons.tsv`,,`halfwidths.tsv`, `slopes.tsv`, `correlation.tsv`, `amplitudes.tsv`, `GoodvsRest_username.tsv`,`allcat_username.tsv`, `NvsNN_username.tsv` ) are created in the SpikeCleaner folder within the Data folder, which is required to be able to access in PHY.
 
 ### MAT Files (Outputs folder)
 All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenameacg.mat`) are created in the Outputs folder in the TIDEV1 directory.
@@ -168,8 +174,11 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 ## Usage
 
 1. Open your data folder that will be your base folder
-2. Change the path to main directory: Where the TIDEV1 is located
-3. Run `dz_ClassifyUnitsAll.m` and adjust thresholds as needed
+2. Add SpikeCleaner to path.
+3. Call `dz_runFirst()`
+4. Call `dz_ClassifyUnitsAll()` and adjust thresholds as needed. The first run would take a very long time because SpikeCleaner would make ACGs and extract waveforms for every cluster and save them in a mat file, every subsequent run would be a few seconds long.
+5. Open PHY for manual curation with SpikeCleaner folder as the base.
+6. Run Accuracy metrics with SpikeCleaner folder as the base.
 
 ## Results
 
