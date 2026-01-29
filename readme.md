@@ -209,27 +209,28 @@ Calculated Time: ~5.5 hours long.
 
 **Figure4: Metrics Single Units Vs Rest between the algorithm and experts users**
 
-![SU Vs Rest](Figures\SUVsRest.png)
+![SU Vs Rest](Figures/SUVsRest.png)
 
 **Figure5: Metrics All categories(SU Vs MUA Vs Noise) between the algorithm and experts users**
 
-![SU Vs Noise Vs MUA](Figures\Metricsallcategories.png)
+![SU Vs Noise Vs MUA](Figures/Metricsallcategories.png)
 
 **Figure6: Metrics Neuronal(SU+MUA) Vs Non-Neuronal(Noise) between the algorithm and experts users**
 
-![Neuronal Vs NonNeuronalt](Figures\NeuronalVsNonNeuronal.png)
+![Neuronal Vs NonNeuronalt](Figures/NeuronalVsNonNeuronal.png)
 
 ## Failure Scenarios
 **Figure7: Algorithm at this point can't process edge case of this kind, it will choose one full spike, if it passes all the threshold barriers and ACG has no refractory period voilations, it will consider that as a Good/Single Unit cluster.**
-![PHY View-Edge Case](Figures\edgecase1.png)
+![PHY View-Edge Case](Figures/edgecase1.png)
 
 **Figure8: Algorithm at this point can't process edge case of this kind,because it will take 3 points from the spike and classify that based on half amplitude and slope and if it pass checks, algorithm will label it as a Good/Single Unit Cluster.**
-![PHY View-Edge Case](Figures\edgecase2.png)
+![PHY View-Edge Case](Figures/edgecase2.png)
 
 ## Acknowledgements
 
 Special thanks to  the expert curators: Dr. Brendon Watson & Dr. Jeremiah Hartner.
 
 This work builds on open-source tools such as [Kilosort](https://github.com/MouseLand/Kilosort) and [Phy](https://github.com/cortex-lab/phy).
+
 
 
