@@ -366,14 +366,17 @@ function dz_Curate(basename,datfil, clufile,thresholds)
                         amplitude=amplitude1;%uV
                     else
                         passReason="Waveform doesn't look physiological";
+                        pass=0;
                     end
                 else
                     disp('Amplitude exceeds ±2000 µV — likely artifact');
                     passReason="Amplitude exceeds ±2000 µV — likely artifact";
+                    pass=0;
                 end  
 
             catch
                 passReason="Waveform doesn't look physiological";
+                pass=0;
           end
 
 
