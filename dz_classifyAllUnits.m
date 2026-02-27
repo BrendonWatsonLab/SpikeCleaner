@@ -3,14 +3,13 @@ function dz_classifyAllUnits(thresholds)
 % Function to run dz_Curate on all .dat files in the current folder and subfolders.
 % - mainDir: path to the code folder
 % - thresholds: optional struct or cell array of thresholds
-    
  
     %look for all kilosort files in SpikeCleaner folder
     spikeCleaner=fullfile(pwd,'SpikeCleaner');
     if isfolder(spikeCleaner)
          % Detect .npy and .dat files
-        npyFiles = getAllExtFiles(spikeCleaner, 'npy', 0); % 1 = include subfolders
-        datFiles = getAllExtFiles(pwd, 'dat', 1);
+        npyFiles = dz_getAllExtFiles(spikeCleaner, 'npy', 0); % 1 = include subfolders
+        datFiles = dz_getAllExtFiles(pwd, 'dat', 1);
     else
         error('Please run dz_runFirst.m to create SpikeCleaner Folder');
     end    
@@ -26,22 +25,23 @@ function dz_classifyAllUnits(thresholds)
         error('Dat file isnt available: %s',datfilematch);      
     end    
     fname=datfile;
-    
+
+             
     %Default thresholds
     defaultThresholds = {...
         'lenient', ...      % ACG evaluation mode ('strict' or 'lenient')
-        0.85, ...           % minHW: Half-width threshold in ms
+        0.45, ...           % minHW: Half-width threshold in ms
         50, ...             % minAmp: Minimum amplitude in uV
         2000, ...           % maxAmp: Maximum amplitude in uV
-        5e5, ...            % minSlope: Minimum slope (uV/s)
+        100, ...            % minSlope: Minimum slope (uV/ms)
         0.05, ...           % firingThreshold: Minimum firing rate (Hz)
         0.8, ...            % acgallthreshold: Threshold for all center bins vs shoulder
         1.1 ...             % acgmaxthreshold: Threshold for any center bin vs shoulder
-        0.95                %correlation 
+        0.96                % max correlation 
    };
 
     % Use defaults if no thresholds provided
-    if nargin < 2 || isempty(thresholds)
+    if nargin < 1 || isempty(thresholds)
         thresholds = defaultThresholds;
     end
 

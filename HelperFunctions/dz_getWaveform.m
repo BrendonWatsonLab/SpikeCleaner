@@ -13,7 +13,9 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
         error('Failed to open the .dat file.');
     end
   
-
+    dattype = input(['Please type:\n' ...
+                 '1 ? Raw int16 ADC counts (.dat)\n' ...
+                 '2 ? Voltage format (µV)\n']);
    
     % Parameters for waveform extraction
     
@@ -61,7 +63,12 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
        
         %% Extracting waveforms for each spike in this cluster
         for j = 1:length(spikeIndices)
-            fprintf('Processing Spike %d/%d in cluster %d\n', j, length(spikeIndices), actualclusterid);
+%             fprintf('Processing Spike %d/%d in cluster %d\n', j, length(spikeIndices), actualclusterid);
+            if mod(j,1000) == 0 || j == 1 || j == length(spikeIndices)
+                fprintf('Processing Spike %d/%d in cluster %d\n', ...
+                    j, length(spikeIndices), actualclusterid);
+            end
+
             idx = spikeIndices(j);  % Current spike index
     
             %%add start and end time stamps and find those timestamps by sample index in dat file,basically convert timestamps to index with respect to dat file
@@ -78,6 +85,10 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
             fseek(fid, (startIdx - 1) * nChannels * 2, 'bof');
             rawBlock = fread(fid, [nChannels, numSamplesToRead], 'int16')';
             extractedData = rawBlock;
+            if dattype==1
+                extractedData=0.195 * (extractedData - 32768); % units = microvolts ; conversion from int16 to uV             
+            end    
+            
 
             
             % Apply padding to keep the size consistent

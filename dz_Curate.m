@@ -48,9 +48,8 @@ function dz_Curate(basename,datfil, clufile,thresholds)
     
     % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Initialize variables
-    originalClusters = unique(clu);
-    uclu = originalClusters;
-    nclu = length(uclu);  
+    uclu = unique(clu);
+    nclu=numel(uclu);
     good = true(nclu, 1);
     noiseReasons = cell(nclu, 1);
     Reasons = cell(nclu, 1); %%%this will hold reasons why a cluster isn't Good.
@@ -101,7 +100,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
     else
         wfdata=load(outputfile); 
     end       
-    %extracting the waveforms
+    %extracting the waveforms::: in uV
     clippedWaveforms = wfdata.clippedWaveforms;
     meanWaveforms = wfdata.meanWaveforms; %smooothened wfs
     bestWaveformsChannel = wfdata.bestWaveformsChannel;
@@ -154,15 +153,16 @@ function dz_Curate(basename,datfil, clufile,thresholds)
         for ix = 1:wfs
             
             spikingType = [];% Reset spikingType to an empty string
-            %current=uclu(i); %%actual cluster id
+            %current=uclu(ix); %%actual cluster id
             if isempty(clippedWaveforms{ix})    
                 continue;      
             end 
                             
             actualclusterid=uclu(ix);
 
-            %actualclusterid=100;
-            %ix = find(uclu == actualclusterid); 
+%             actualclusterid=3;
+%             ix = find(uclu == actualclusterid);
+            
            %%check for waveform shape to label noise
             waveforms=clippedWaveforms{ix};
             bestCh = bestWaveformsChannel{ix};
@@ -180,7 +180,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             pass=0;
             
 
-            %%%%Checking juts for best wf to begin with
+            %%%%Checking just for best wf to begin with
             [bestFittedValues]=dz_fitPolynomial(smoothenedbestwf,timeVector); %%finding the best polynomial fit for the best wf-just highpassed
             % Find peaks and troughs
             [allLocsSorted, sortIdx] = dz_detectPeaksAndTroughs(bestFittedValues,timeVector); %%smoothened wf
@@ -354,49 +354,59 @@ function dz_Curate(basename,datfil, clufile,thresholds)
                     end
                 end
                 %%%if amplitude is >maxAmp then its noise 
-                if abs(bestwf)<maxAmp
+               peaktopeak=max(bestwf)-min(bestwf);
+%                max(abs(bestwf))
+                if peaktopeak<maxAmp
                      %% find new best channel
                     if length(sortIdx1) == 3
                         [spikingType, quality,passReason1,halfWidth,Slope1,Slope2,amplitude1] = dz_analyzeSpikeType(bestwf, timeVector, allLocsSorted1, actualclusterid, bestCh,minHW,minAmp,minSlope);
                      
                         Half_width=halfWidth;%ms
-                        Slope=(min(Slope1,Slope2))/100;% uV/s --->uV/ms
+                        Slope=(min(Slope1,Slope2));%uV/ms
                         Slope=abs(Slope);
 
                         amplitude=amplitude1;%uV
+                        quality1=quality;
                     else
-                        passReason="Waveform doesn't look physiological";
+                        passReason1="Waveform doesn't look physiological";
+                       
+                        quality1=0;
                     end
                 else
                     disp('Amplitude exceeds ±2000 µV — likely artifact');
-                    passReason="Amplitude exceeds ±2000 µV — likely artifact";
+                    passReason1="Amplitude exceeds ±2000 µV — likely artifact";
+                    quality1=0;
+            
                 end  
 
             catch
-                passReason="Waveform doesn't look physiological";
+                passReason1="Waveform doesn't look physiological";
+                quality1=0;
+             
           end
 
 
-         %%%%%%%%%%%%%%correlation check for channel corr,if more than 50% channels ar highly corr then noise otherwise good
+         %%%%%%%%%%%%%%correlation check for channel corr,if more than 80% channels ar highly corr then noise otherwise good
          
-        corrValues = channelCorrelations{ix};
-        corr=corrValues;
-        totalChannels = length(corr); % Total number of remaining channels
-        numHighCorr = sum(corr > correlationthreshold);
+        corrValues = channelCorrelations{ix};     
+        totalChannels = length(corrValues); % Total number of remaining channels
+        numHighCorr = sum(corrValues > correlationthreshold);
         percentHighCorr = (numHighCorr / totalChannels) * 100;
 
-
-        if (percentHighCorr>80) 
+        
+        if (percentHighCorr>80)
                 pass=0; %%noise
                 %disp(['Cluster ID: ', num2str(actualclusterid),' | Percentage of High Correlation Channels: ', num2str(percentHighCorr), '%']);
                 %disp('Noise');
                 passReason = sprintf('High Correlation (%.2f%%) on all Channels', percentHighCorr);
-
+        elseif (quality1 == 0)
+               pass=0;
+               passReason=passReason1;        
         else
                 pass=1; %GOOD
                 %disp(['Cluster ID: ', num2str(actualclusterid),' | Percentage of High Correlation Channels: ', num2str(percentHighCorr), '%']);
                 %disp('Good');
-               
+              
         end     
        
 
@@ -419,11 +429,11 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             %disp('Noise');
             noiseReasons{ix} = 'Noise';
             Reasons{ix} = passReason;
-            halfwidth{ix}=Half_width;
+            halfwidth{ix}=Half_width;%ms
             corrCell{ix}=percentHighCorr;
-            slope{ix}=Slope;
+            slope{ix}=Slope;%uV/ms
             good(ix)=false;
-            amplitudes{ix}=amplitude;
+            amplitudes{ix}=amplitude;%uV
     
         else
             %disp('Good');
@@ -459,8 +469,15 @@ function dz_Curate(basename,datfil, clufile,thresholds)
 
             if exist(acgfile,'file')
                acgData=acgs{ix};
-               currentacg = acgData.currentacg;
-               binCenters = acgData.binCenters;
+               if isempty(acgData)
+                    numBins=25;
+                    [currentacg,binCenters] = dz_autoCorr(tst, tst, binSize, numBins);
+                    acgs{ix} = struct('currentacg', currentacg, 'binCenters', binCenters);     
+               else
+                    currentacg = acgData.currentacg;
+                    binCenters = acgData.binCenters;
+               end    
+              
             else
                 numBins=25;
                 [currentacg,binCenters] = dz_autoCorr(tst, tst, binSize, numBins);
@@ -505,7 +522,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
            searchStart = zeroLagIndex + 3;  % skip 3 bins on right side of center
            seg = currentacg(searchStart:end);
           
-            %%finding the higheest peak
+            %%finding the highest peak
             k =20;                                 
 
             if numel(seg) > k && all(seg(1) > seg(2:k+1))
@@ -558,7 +575,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             end
            if noiseflag==true
                 good(ix)=false;
-                noiseReasons{ix} = 'Noise';
+                noiseReasons{ix} = 'MUA'; %change this to MUA
                 Reasons{ix} = passReason;
                 continue;  
            end  

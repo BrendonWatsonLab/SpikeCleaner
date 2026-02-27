@@ -97,14 +97,15 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
     end
 
     halfWidth=halfWidth*1000;%ms
- 
-    if halfWidth<=minHW
+    Slope1=Slope1/1000;% uV/s --->uV/ms
+    Slope2=Slope2/1000;% uV/s --->uV/ms
+    if halfWidth<=minHW   
         if amplitude>minAmp
-            if (abs(Slope1)>=minSlope || abs(Slope2)>=minSlope)
+            if (abs(Slope1)>=minSlope || abs(Slope2)>=minSlope) 
                 quality =1;  
                 passReason="Waveform passes all checks";
             else
-                passReason="Slope too low (<500,000 uV/s),potential slow waveform";
+                passReason="Slope too low (<100 uV/ms),potential slow waveform"; %write in ms
                 quality =0;
             end    
         else
@@ -112,7 +113,7 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
             quality =0;
         end    
     else   
-        passReason="Half Width is too large (>0.85ms)";
+        passReason="Half Width is too large (>0.45ms)";
         quality =0;
     end    
     halfWidth=round(halfWidth,2);
@@ -124,21 +125,21 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
     xHalfWidth = [timeVector(leftIdx), timeVector(rightIdx)];
     yHalfWidth = [halfAmplitude, halfAmplitude];
     % 
-    % figure;
-    % plot(timeVector, waveform, 'b', 'LineWidth', 1.5); hold on;
-    % plot(timeVector(allLocsSorted_idx), waveform(allLocsSorted_idx), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r'); % Peaks/Troughs
-    % plot(timeVector(centerIndex), waveform(centerIndex), 'go', 'MarkerSize', 10, 'MarkerFaceColor', 'g'); % Center point
-    % if ~isinf(halfWidth)
-    %     plot([timeVector(leftIdx), timeVector(rightIdx)], ...
-    %  [halfAmplitude, halfAmplitude], 'k--', 'LineWidth', 1.5); % Half width line
-    % end
-    % 
-    % title(sprintf('Spike Type: %s | Quality: %d | Cluster ID: %d | Channel: %d', spikingType, quality, actualClusterID,channelUsed));
-    % 
-    % xlabel('Time (s)');
-    % ylabel('Amplitude');
-    % legend('Waveform', 'Peaks/Troughs', 'Center Point', 'Half Width');
-    % hold off;
+%     figure;
+%     plot(timeVector, waveform, 'b', 'LineWidth', 1.5); hold on;
+%     plot(timeVector(allLocsSorted_idx), waveform(allLocsSorted_idx), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r'); % Peaks/Troughs
+%     plot(timeVector(centerIndex), waveform(centerIndex), 'go', 'MarkerSize', 10, 'MarkerFaceColor', 'g'); % Center point
+%     if ~isinf(halfWidth)
+%         plot([timeVector(leftIdx), timeVector(rightIdx)], ...
+%      [halfAmplitude, halfAmplitude], 'k--', 'LineWidth', 1.5); % Half width line
+%     end
+%     
+%     title(sprintf('Spike Type: %s | Quality: %d | Cluster ID: %d | Channel: %d', spikingType, quality, actualClusterID,channelUsed));
+%     
+%     xlabel('Time (s)');
+%     ylabel('Amplitude');
+%     legend('Waveform', 'Peaks/Troughs', 'Center Point', 'Half Width');
+%     hold off;
     % % % 
     % % 
 

@@ -1,6 +1,6 @@
 function dz_goodVsRest(curdir)
 %%By Diksha Zutshi
-%run first: to chnage the shame of the data folder to make it compatible.
+%run first: to chnage the name of the data folder to make it compatible.
 if nargin < 1 || isempty(curdir)
     curdir=pwd;
 end    
@@ -9,13 +9,16 @@ end
 username=strtrim(lower(input('Enter the user name for the PHY display:','s')));
 group1 =readtable("cluster_SpikeCleaner.tsv", 'FileType', 'text', 'Delimiter', '\t');%spike cleaner outputs
 userlabels='cluster_group.tsv';
+userlabelpath=fullfile(curdir,userlabels);
 renameduser=sprintf('cluster_group_%s.tsv',username);
-group= readtable(renameduser, 'FileType', 'text', 'Delimiter', '\t');
- % Rename header "group" to "username_group"
-oldVar = 'group';
-newVar = sprintf('%s_group', username);
-if ~isfile(renameduser)    
-    if isfile(userlabels)
+renameduserpath=fullfile(curdir,renameduser);
+
+
+if ~isfile(renameduserpath)
+    group= readtable(userlabels, 'FileType', 'text', 'Delimiter', '\t');
+    oldVar = 'group';
+    newVar = sprintf('%s_group', username);
+    if isfile(userlabelpath)
         movefile(userlabels,renameduser); %renames the original tsv file
         fprintf('renamed the user labels %s to %s \n',userlabels,renameduser);
         %rename header name        
@@ -33,15 +36,23 @@ if ~isfile(renameduser)
     else
         warning('Cant find cluster_group.tsv, please manually curate using PHY');
     end    
-end
+    
+else
+    group= readtable(renameduserpath, 'FileType', 'text', 'Delimiter', '\t');
+end    
+
+
 % Cleaning up strings
 group1.SpikeCleaner = strtrim(lower(group1.SpikeCleaner));
-
 % Merge tables on cluster_id
 merged = innerjoin(group, group1, 'Keys', 'cluster_id');
+%brendon_group
+renamedcol=[username,'_','group'];
+
+
 
 %labels: 1 = good, 0 = not good
-true_label = double(merged.(newVar) == "good");
+true_label = double(merged.(renamedcol) == "good");
 pred_label = double(merged.SpikeCleaner == "good");
 
 % Confusion matrix components

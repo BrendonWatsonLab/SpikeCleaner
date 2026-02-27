@@ -7,13 +7,16 @@ end
 username=strtrim(lower(input('Enter the user name for the PHY display:','s')));
 group1 =readtable("cluster_SpikeCleaner.tsv", 'FileType', 'text', 'Delimiter', '\t');%spike cleaner outputs
 userlabels='cluster_group.tsv';
+userlabelpath=fullfile(curdir,userlabels);
 renameduser=sprintf('cluster_group_%s.tsv',username);
-group= readtable(renameduser, 'FileType', 'text', 'Delimiter', '\t');
- % Rename header "group" to "username_group"
-oldVar = 'group';
-newVar = sprintf('%s_group', username);
-if ~isfile(renameduser)    
-    if isfile(userlabels)
+renameduserpath=fullfile(curdir,renameduser);
+
+
+if ~isfile(renameduserpath)
+    group= readtable(userlabels, 'FileType', 'text', 'Delimiter', '\t');
+    oldVar = 'group';
+    newVar = sprintf('%s_group', username);
+    if isfile(userlabelpath)
         movefile(userlabels,renameduser); %renames the original tsv file
         fprintf('renamed the user labels %s to %s \n',userlabels,renameduser);
         %rename header name        
@@ -31,16 +34,22 @@ if ~isfile(renameduser)
     else
         warning('Cant find cluster_group.tsv, please manually curate using PHY');
     end    
-end
- 
+    
+else
+    group= readtable(renameduserpath, 'FileType', 'text', 'Delimiter', '\t');
+end    
+
+
 % Cleaning up strings
 group1.SpikeCleaner = strtrim(lower(group1.SpikeCleaner));
-
 % Merge tables on cluster_id
 merged = innerjoin(group, group1, 'Keys', 'cluster_id');
+%brendon_group
+renamedcol=[username,'_','group'];
+
 
  %: "neuronal" if good or mua
-true_label = ismember(merged.(newVar), ["good","mua"]);
+true_label = ismember(merged.(renamedcol), ["good","mua"]);
 
 % pred_label: 1 if not noise/lowrate, 0 otherwise
 non_neuronal_algo = contains(merged.SpikeCleaner, "noise") | ...

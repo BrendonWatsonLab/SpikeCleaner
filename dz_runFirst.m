@@ -1,6 +1,9 @@
 function dz_runFirst(curdir)
 %%By Diksha Zutshi
 %run first: to chnage the shame of the data folder to make it compatible.
+rootdir=fileparts(mfilename('fullpath'));
+addpath(genpath(rootdir));
+
 if nargin < 1 || isempty(curdir)
     curdir=pwd;
 end    

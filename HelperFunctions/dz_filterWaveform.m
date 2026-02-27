@@ -11,6 +11,7 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
     else
         error('Input file %s does not exist.', inputFile);
     end
+    
 
     % Initialize storage for results
     clippedWaveforms = cell(length(wf), 1); %highpass
@@ -53,8 +54,7 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
         for ch = 1:numChannels
             waveforms(:, ch) = filtfilt(b, a,  waveforms(:, ch)); %iir
         end
-        clippedWaveforms{ix} = waveforms;%just highpass
-        
+        clippedWaveforms{ix} = waveforms;%just highpass       
         waveforms1=waveforms; 
    
         %% MOVING AVERAGE WINDOW  :             
@@ -71,14 +71,6 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
         %% Calculate correlations between the best waveform and all other channels
         bestWaveform1 = waveforms(:, maxCh);
         bestWaveforms{ix}=bestWaveform1;
-
-        % bestchannelforcorr=waveforms1(:, maxCh);  %%using mean  wfs -movmean
-        % corrValues = zeros(1, numChannels);
-        % for ch = 1:numChannels
-        %     corrValues(ch) = corr(bestchannelforcorr, waveforms1(:, ch));
-        % end
-        % channelCorrelations{ix} = corrValues;
-
 
         % Define neighborhood:  instead of just  the max channel use max+/-3 to find corr with rest of the channels
         % store only the highestcorr from that

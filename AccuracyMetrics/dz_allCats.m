@@ -10,17 +10,19 @@ end
 username=strtrim(lower(input('Enter the user name for the PHY display:','s')));
 group1 =readtable("cluster_SpikeCleaner.tsv", 'FileType', 'text', 'Delimiter', '\t');%spike cleaner outputs
 userlabels='cluster_group.tsv';
+userlabelpath=fullfile(curdir,userlabels);
 renameduser=sprintf('cluster_group_%s.tsv',username);
-group= readtable(renameduser, 'FileType', 'text', 'Delimiter', '\t');
+renameduserpath=fullfile(curdir,renameduser);
 
-% Rename header "group" to "username_group"
-oldVar = 'group';
-newVar = sprintf('%s_group', username);
-if ~isfile(renameduser)    
-    if isfile(userlabels)
+
+if ~isfile(renameduserpath)
+    group= readtable(userlabels, 'FileType', 'text', 'Delimiter', '\t');
+    oldVar = 'group';
+    newVar = sprintf('%s_group', username);
+    if isfile(userlabelpath)
         movefile(userlabels,renameduser); %renames the original tsv file
         fprintf('renamed the user labels %s to %s \n',userlabels,renameduser);
-
+        %rename header name        
         idx = strcmp(group.Properties.VariableNames, oldVar);
         if any(idx)
             group.Properties.VariableNames{idx} = newVar;
@@ -35,15 +37,22 @@ if ~isfile(renameduser)
     else
         warning('Cant find cluster_group.tsv, please manually curate using PHY');
     end    
-end
+    
+else
+    group= readtable(renameduserpath, 'FileType', 'text', 'Delimiter', '\t');
+end    
+
+
 % Cleaning up strings
 group1.SpikeCleaner = strtrim(lower(group1.SpikeCleaner));
-
 % Merge tables on cluster_id
 merged = innerjoin(group, group1, 'Keys', 'cluster_id');
+%brendon_group
+renamedcol=[username,'_','group'];
+
 
 % Assign "Match" or "NotMatch"
-merged.(newVar) = string(merged.(newVar));
+merged.(renamedcol) = string(merged.(renamedcol));
 merged.SpikeCleaner = string(lower(merged.SpikeCleaner)); % predictions
 % Combine lowrate -> noise
 merged.SpikeCleaner(merged.SpikeCleaner == "lowrate") = "noise";
@@ -52,7 +61,7 @@ merged.SpikeCleaner(merged.SpikeCleaner == "lowrate") = "noise";
 merged.fp_fn = repmat("NotMatch", height(merged), 1);
 
 % Assign "Match" where equal
-mask = merged.(newVar) == merged.SpikeCleaner;
+mask = merged.(renamedcol) == merged.SpikeCleaner;
 merged.fp_fn(mask) = "Match";
 
 
@@ -67,7 +76,7 @@ pred_label = zeros(height(merged),1);
 
 % === Convert to numeric for confusion matrix ===
 for i = 1:height(merged)
-    true_label(i) = label_map(merged.(newVar)(i));
+    true_label(i) = label_map(merged.(renamedcol)(i));
     pred_label(i) = label_map(merged.SpikeCleaner(i));
 end
 
