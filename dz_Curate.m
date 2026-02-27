@@ -575,7 +575,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             end
            if noiseflag==true
                 good(ix)=false;
-                noiseReasons{ix} = 'MUA'; %change this to MUA
+                noiseReasons{ix} = 'MUA';
                 Reasons{ix} = passReason;
                 continue;  
            end  
