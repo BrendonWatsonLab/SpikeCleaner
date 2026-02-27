@@ -368,6 +368,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
                         amplitude=amplitude1;%uV
                         quality1=quality;
                     else
+
                         passReason1="Waveform doesn't look physiological";
                        
                         quality1=0;
@@ -379,10 +380,10 @@ function dz_Curate(basename,datfil, clufile,thresholds)
             
                 end  
 
-            catch
+          catch
                 passReason1="Waveform doesn't look physiological";
                 quality1=0;
-             
+     
           end
 
 
