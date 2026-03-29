@@ -1,0 +1,165 @@
+function findACGallThreshold()
+% Find thersholds for ACGall: above that percentage of fill in ACG user thinks ACG is too full to be neuronal.
+
+% We expect to see a rising curve which plateaus: matches increasing as the threshold rising, 
+%as it's a one sided threshold
+
+% Here we run all the threshold values in a loop and match it with the user's curation, 
+% to see at which threshold user seem to agree the most with the algorithm.
+
+acgallsv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
+% % %% run classifyAllUnits with different ACG thresholds
+acgmax1=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
+baseThresholds = { ...
+    'lenient', ...   % ACG evaluation mode ('strict' or 'lenient')
+    0.7, ...         % maxHW: Half-width threshold in ms (will be overwritten)
+    50, ...          % minAmp: Minimum amplitude in uV
+    2000, ...        % maxAmp: Maximum amplitude in uV
+    200, ...         % minSlope: Minimum slope (uV/s)
+    0.05, ...        % firingThreshold: Minimum firing rate (Hz)
+    NaN, ...         % acgallthreshold: Threshold for all center bins vs shoulder
+    Noise, ...         % label for acgall: Noise or MUA:::from results from findACGallThreshold()
+    1.1 , ...         % acgmaxthreshold: Threshold for any center bin vs shoulder
+    Noise, ...         % label for acgany: Noise or MUA::: from results from findACGanyThreshold()..          
+    0.95              % correlation
+};
+ 
+  
+
+ACGall=fullfile(pwd,'ACGall');
+if ~exist(ACGall,'dir')
+    mkdir(ACGall);
+end    
+for i = 1:numel(acgmax1)
+      
+    baseThresholds{7} = acgmax1(i);     % set minHW for this run
+    dz_classifyAllUnits(baseThresholds);
+
+    
+    dstFile = fullfile(ACGall, sprintf('ACGall_%0.2f.tsv', acgmax1(i)));
+    movefile(acgallsv, dstFile);
+end
+
+
+%% Plotting
+tsvfiles=dir(fullfile(pwd,'ACGall','*.tsv'));
+files = dir(fullfile(pwd,'SpikeCleaner', 'cluster_group*.tsv'));
+filePath = fullfile(files(1).folder, files(1).name);
+T1=readtable(filePath, ...
+        'FileType','text', ...
+        'Delimiter','\t');
+thresholds = nan(length(tsvfiles),1);   
+ 
+for i=1:length(tsvfiles)
+    algo = fullfile(tsvfiles(i).folder, tsvfiles(i).name);
+    tok = regexp(tsvfiles(i).name, '^ACGall_(\d*\.?\d+)\.tsv$', 'tokens', 'once');
+
+    thresholds(i) = str2double(tok{1});
+    T = readtable(algo, ...
+        'FileType','text', ...
+        'Delimiter','\t');
+    
+      % Cleaning up strings
+    T.Reasons = strtrim(lower(T.Reasons));
+    % Merge tables on cluster_id
+    merged = innerjoin(T, T1, 'Keys', 'cluster_id');
+        
+     % ---- High correlation reason rows (in the *merged* table)
+    idxHighCorr = startsWith(merged.Reasons, "centerbins proportion greater");  
+    
+     % renaming the merged user label
+    vars = merged.Properties.VariableNames;
+    groupCol = vars(contains(lower(vars),'group'));
+    userLabels = merged.(groupCol{1});
+    %% user thinks such cases are noise
+    % ---- user thinks noise (in merged.group)
+    idxUserNoise = (lower(strtrim(string(userLabels))) == "noise");    
+    % ---- match: high corr reason & user noise
+    highCorrNoiseMatches(i) = sum(idxHighCorr == idxUserNoise);       
+    % total units
+    totalUnits = height(merged);
+    % percentage
+    percentMatchesnoise(i) = 100 * highCorrNoiseMatches(i) / totalUnits;        
+    
+    %% user thinks such caes are mua
+    % ---- user thinks noise (in merged.group)
+    idxUserNoise1 = (lower(strtrim(string(userLabels))) == "mua");   
+    % ---- match: high corr reason & user noise
+    highCorrNoiseMatches1(i) = sum(idxHighCorr == idxUserNoise1);   
+    % percentage
+    percentMatchesmua(i) = 100 * highCorrNoiseMatches1(i) / totalUnits;    
+        
+end
+
+betterLabel = strings(length(thresholds),1);
+
+for i = 1:length(thresholds)
+    if percentMatchesnoise(i) > percentMatchesmua(i)
+        betterLabel(i) = "noise";
+    elseif percentMatchesmua(i) > percentMatchesnoise(i)
+        betterLabel(i) = "mua";
+    else
+        betterLabel(i) = "tie";
+    end
+end
+
+resultTable = table(thresholds(:), percentMatchesnoise(:), percentMatchesmua(:), betterLabel(:), ...
+    'VariableNames', {'Threshold','NoiseMatchPct','MuaMatchPct','BetterLabel'});
+
+disp(resultTable)
+
+%% choose the rising curve between mua and noise labels
+
+%noise
+% remove skipped
+valid = ~isnan(thresholds);
+thresholds = thresholds(valid);
+percentMatches = percentMatchesnoise(valid);
+[thresholds_sorted, idx] = sort(thresholds, 'ascend');
+percentMatches_sorted1 = percentMatches(idx);
+% 
+% % % plot
+% figure;
+% plot(thresholds_sorted, percentMatches_sorted1, '-o'); grid on;
+% xlabel('ACG all bins threshold');
+% ylabel('Total matches for Noise labels(Only counting all ACG Bins being higher than the thershold)');
+% title('Max allowed percentage in all centerbins required for users to think its still neuronal: Otherwise Noise');
+% grid on;
+
+%mua
+% remove skipped
+valid = ~isnan(thresholds);
+thresholds = thresholds(valid);
+percentMatches = percentMatchesmua(valid);
+[thresholds_sorted, idx] = sort(thresholds, 'ascend');
+percentMatches_sorted2 = percentMatches(idx);
+% 
+% % % plot
+% figure;
+% plot(thresholds_sorted, percentMatches_sorted2, '-o'); grid on;
+% xlabel('ACG all bins threshold');
+% ylabel('Total matches for MUA labels(Only counting all ACG Bins being higher than the thershold)');
+% title('Max allowed percentage in all centerbins required for users to think its still a Single Unit-: Otherwise MUA');
+% grid on;
+
+
+% both together
+fig1 = figure;
+plot(thresholds_sorted, percentMatches_sorted1, '-o'); grid on;
+hold on;
+plot(thresholds_sorted, percentMatches_sorted2, '-s'); grid on;
+xlabel('ACG all bins threshold');
+ylabel('Total matches for Noise/MUA labels(Only counting all ACG Bins being higher than the thershold)');
+title('Max allowed percentage in all centerbins required for users to think its still neuronal: Otherwise Noise/MUA');
+legend('Noise', 'MUA', 'Location', 'best');
+
+text(0.6, 80, {'Choose the label of the rising curve for this criteria and plug it in defaultThresholds in dz_ classifyAllUnits .', ...
+               'Choose the first value on x-axis, where y-axis value elbows and then platues.'}, ...
+     'FontSize', 10);
+% grid on;
+
+%saving
+saveas(fig1, fullfile(pwd,'ACGall', 'ACGall_Noise_vs_MUA.png'));
+
+
+end

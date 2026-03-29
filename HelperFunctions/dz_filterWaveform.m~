@@ -75,7 +75,7 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
         % Define neighborhood:  instead of just  the max channel use max+/-3 to find corr with rest of the channels
         % store only the highestcorr from that
         %refWf = waveforms1(:, maxCh); 
-        corrValues = corr(bestWaveform1, waveforms);
+        corrValues = corr(bestWaveform1, waveforms1);
         corrValues(:,maxCh) = 0; %zeroing out the self correlation
         
 %         neigh = 3;

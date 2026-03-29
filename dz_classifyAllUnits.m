@@ -29,15 +29,17 @@ function dz_classifyAllUnits(thresholds)
              
     %Default thresholds
     defaultThresholds = {...
-        'lenient', ...      % ACG evaluation mode ('strict' or 'lenient')
-        0.45, ...           % minHW: Half-width threshold in ms
+        'strict', ...      % ACG evaluation mode ('strict' or 'lenient')
+        0.7, ...           % minHW: Half-width threshold in ms
         50, ...             % minAmp: Minimum amplitude in uV
         2000, ...           % maxAmp: Maximum amplitude in uV
-        100, ...            % minSlope: Minimum slope (uV/ms)
+        200, ...            % minSlope: Minimum slope (uV/ms)
         0.05, ...           % firingThreshold: Minimum firing rate (Hz)
-        0.8, ...            % acgallthreshold: Threshold for all center bins vs shoulder
-        1.1 ...             % acgmaxthreshold: Threshold for any center bin vs shoulder
-        0.96                % max correlation 
+        0.9, ...            % acgallthreshold: Threshold for all center bins vs shoulder
+        'Noise', ...         % label for acgall: Noise or MUA:::from results from findACGallThreshold()
+        1 ...,             % acgmaxthreshold: Threshold for any center bin vs shoulder
+        'Noise', ...         % label for acgany: Noise or MUA::: from results from findACGanyThreshold()
+        0.95                % max correlation 
    };
 
     % Use defaults if no thresholds provided

@@ -99,13 +99,14 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
     halfWidth=halfWidth*1000;%ms
     Slope1=Slope1/1000;% uV/s --->uV/ms
     Slope2=Slope2/1000;% uV/s --->uV/ms
+    halfWidth=round(halfWidth,2);
     if halfWidth<=minHW   
         if amplitude>minAmp
             if (abs(Slope1)>=minSlope || abs(Slope2)>=minSlope) 
                 quality =1;  
                 passReason="Waveform passes all checks";
             else
-                passReason="Slope too low (<100 uV/ms),potential slow waveform"; %write in ms
+                passReason="Slope too low (<200 uV/ms),potential slow waveform"; %write in ms
                 quality =0;
             end    
         else
@@ -113,7 +114,7 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
             quality =0;
         end    
     else   
-        passReason="Half Width is too large (>0.45ms)";
+        passReason="Half Width is too large (>0.7ms)";
         quality =0;
     end    
     halfWidth=round(halfWidth,2);
@@ -125,6 +126,7 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
     xHalfWidth = [timeVector(leftIdx), timeVector(rightIdx)];
     yHalfWidth = [halfAmplitude, halfAmplitude];
     % 
+    timeVector = timeVector * 1000; %timevector in ms
 %     figure;
 %     plot(timeVector, waveform, 'b', 'LineWidth', 1.5); hold on;
 %     plot(timeVector(allLocsSorted_idx), waveform(allLocsSorted_idx), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r'); % Peaks/Troughs
@@ -136,11 +138,11 @@ function [spikingType, quality,passReason,halfWidth,Slope1,Slope2,amplitude] = d
 %     
 %     title(sprintf('Spike Type: %s | Quality: %d | Cluster ID: %d | Channel: %d', spikingType, quality, actualClusterID,channelUsed));
 %     
-%     xlabel('Time (s)');
-%     ylabel('Amplitude');
+%     xlabel('Time (ms)');
+%     ylabel('Amplitude (uV)');
 %     legend('Waveform', 'Peaks/Troughs', 'Center Point', 'Half Width');
 %     hold off;
-    % % % 
+%     % % % 
     % % 
 
 end

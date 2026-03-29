@@ -120,7 +120,7 @@ function dz_Curate(basename,datfil, clufile,thresholds)
     
   
     acgfile = fullfile(outputsDir, basename + "acg.mat");
-    assessAcgQuality(clustersToCheck,acgEvaluationMode,acgallthreshold,acgalllabel,acganythreshold,acganylabel,acgfile) %%---will give final decision of good clusters
+    assessAcgQuality(clustersToCheck,acgEvaluationMode,acgallthreshold,acgmaxthreshold,acgfile) %%---will give final decision of good clusters
      
     %% 
     clustersToRecluster=[];
