@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 29.8.2, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 985 666" style="enable-background:new 0 0 985 666;" xml:space="preserve">
+<style type="text/css">
+	.st0{clip-path:url(#SVGID_00000017482439200527223840000010313958805602474148_);}
+	.st1{clip-path:url(#SVGID_00000127012290321406607140000001809851972929304969_);fill:#FFFFFF;}
+	.st2{fill:#FFFFFF;}
+	.st3{fill:none;stroke:#262626;stroke-width:0.6667;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st4{fill:#262626;}
+	.st5{font-family:'MyriadPro-Regular';}
+	.st6{font-size:13.3333px;}
+	.st7{font-family:'TimesNewRomanPS-BoldMT';}
+	.st8{font-size:14px;}
+	.st9{font-size:15px;}
+	.st10{font-size:17.2605px;}
+	.st11{fill:none;stroke:#0072BD;stroke-width:0.6667;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st12{fill:none;stroke:#0072BD;stroke-miterlimit:10;}
+	.st13{font-family:'TimesNewRomanPS-BoldItalicMT';}
+	.st14{enable-background:new    ;}
+	.st15{font-size:18px;}
+	.st16{font-size:16.5657px;}
+	.st17{fill:none;stroke:#000000;stroke-width:2;stroke-miterlimit:10;}
+	.st18{fill:#065418;}
+</style>
+<g>
+	<defs>
+		<rect id="SVGID_1_" x="-1" y="-1" width="985" height="666"/>
+	</defs>
+	<clipPath id="SVGID_00000111885711560487242520000010817495515191521978_">
+		<use xlink:href="#SVGID_1_"  style="overflow:visible;"/>
+	</clipPath>
+	<g style="clip-path:url(#SVGID_00000111885711560487242520000010817495515191521978_);">
+		<g>
+			<g>
+				<defs>
+					<rect id="SVGID_00000001626904167423868060000014387475309910010795_" x="-69" y="-1" width="1110" height="693"/>
+				</defs>
+				<clipPath id="SVGID_00000088823980643943479310000012497095962999713980_">
+					<use xlink:href="#SVGID_00000001626904167423868060000014387475309910010795_"  style="overflow:visible;"/>
+				</clipPath>
+				
+					<rect x="-69" y="-1" style="clip-path:url(#SVGID_00000088823980643943479310000012497095962999713980_);fill:#FFFFFF;" width="1110" height="693"/>
+			</g>
+		</g>
+		<g>
+			<rect x="-69" y="-1" class="st2" width="1110" height="693"/>
+			<path class="st2" d="M75,616h861V51H75V616z"/>
+		</g>
+		<g>
+			<line class="st3" x1="75" y1="616" x2="936" y2="616"/>
+			<line class="st3" x1="75" y1="51" x2="936" y2="51"/>
+			<line class="st3" x1="75" y1="616" x2="75" y2="607.39"/>
+			<line class="st3" x1="362" y1="616" x2="362" y2="607.39"/>
+			<line class="st3" x1="649" y1="616" x2="649" y2="607.39"/>
+			<line class="st3" x1="936" y1="616" x2="936" y2="607.39"/>
+			<line class="st3" x1="75" y1="51" x2="75" y2="59.61"/>
+			<line class="st3" x1="362" y1="51" x2="362" y2="59.61"/>
+			<line class="st3" x1="649" y1="51" x2="649" y2="59.61"/>
+			<line class="st3" x1="936" y1="51" x2="936" y2="59.61"/>
+		</g>
+		<g transform="translate(144,622.3332)">
+			<text transform="matrix(1 0 0 1 -73.5 12)" class="st4 st5 st6">0</text>
+		</g>
+		<g transform="translate(431,622.3332)">
+			<text transform="matrix(1 0 0 1 -86 12)" class="st4 st5 st6">5000</text>
+		</g>
+		<g transform="translate(718,622.3332)">
+			<text transform="matrix(1 0 0 1 -90.5 12)" class="st4 st5 st6">10000</text>
+		</g>
+		<g transform="translate(1005,622.3332)">
+			<text transform="matrix(1 0 0 1 -90.5 12)" class="st4 st5 st6">15000</text>
+		</g>
+		<g transform="translate(574.5004,640.6664)">
+			<text transform="matrix(1.0092 0 0 1 -176.5004 12.9996)" class="st4 st7 st8">MAXIMUM AMPLITUDE THRESHOLD (uV)</text>
+		</g>
+		<g>
+			<line class="st3" x1="75" y1="616" x2="75" y2="51"/>
+			<line class="st3" x1="936" y1="616" x2="936" y2="51"/>
+			<line class="st3" x1="75" y1="616" x2="83.61" y2="616"/>
+			<line class="st3" x1="75" y1="553.22" x2="83.61" y2="553.22"/>
+			<line class="st3" x1="75" y1="490.44" x2="83.61" y2="490.44"/>
+			<line class="st3" x1="75" y1="427.67" x2="83.61" y2="427.67"/>
+			<line class="st3" x1="75" y1="364.89" x2="83.61" y2="364.89"/>
+			<line class="st3" x1="75" y1="302.11" x2="83.61" y2="302.11"/>
+			<line class="st3" x1="75" y1="239.33" x2="83.61" y2="239.33"/>
+			<line class="st3" x1="75" y1="176.56" x2="83.61" y2="176.56"/>
+			<line class="st3" x1="75" y1="113.78" x2="83.61" y2="113.78"/>
+			<line class="st3" x1="75" y1="51" x2="83.61" y2="51"/>
+			<line class="st3" x1="936" y1="616" x2="927.39" y2="616"/>
+			<line class="st3" x1="936" y1="553.22" x2="927.39" y2="553.22"/>
+			<line class="st3" x1="936" y1="490.44" x2="927.39" y2="490.44"/>
+			<line class="st3" x1="936" y1="427.67" x2="927.39" y2="427.67"/>
+			<line class="st3" x1="936" y1="364.89" x2="927.39" y2="364.89"/>
+			<line class="st3" x1="936" y1="302.11" x2="927.39" y2="302.11"/>
+			<line class="st3" x1="936" y1="239.33" x2="927.39" y2="239.33"/>
+			<line class="st3" x1="936" y1="176.56" x2="927.39" y2="176.56"/>
+			<line class="st3" x1="936" y1="113.78" x2="927.39" y2="113.78"/>
+			<line class="st3" x1="936" y1="51" x2="927.39" y2="51"/>
+		</g>
+		<g transform="translate(138.6667,617)">
+			<text transform="matrix(1 0 0 1 -86 3.5)" class="st4 st5 st6">40</text>
+		</g>
+		<g transform="translate(138.6667,554.222)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">40.2</text>
+		</g>
+		<g transform="translate(138.6667,491.444)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">40.4</text>
+		</g>
+		<g transform="translate(138.6667,428.6671)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">40.6</text>
+		</g>
+		<g transform="translate(138.6667,365.8891)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">40.8</text>
+		</g>
+		<g transform="translate(138.6667,303.1111)">
+			<text transform="matrix(1 0 0 1 -86 3.5)" class="st4 st5 st6">41</text>
+		</g>
+		<g transform="translate(138.6667,240.3331)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">41.2</text>
+		</g>
+		<g transform="translate(138.6667,177.5551)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">41.4</text>
+		</g>
+		<g transform="translate(138.6667,114.7783)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">41.6</text>
+		</g>
+		<g transform="translate(138.6667,52.0002)">
+			<text transform="matrix(1 0 0 1 -99 3.5)" class="st4 st5 st6">41.8</text>
+		</g>
+		<g transform="translate(104.6667,334.4995) rotate(-90)">
+			<text transform="matrix(0.9334 0 0 1 -240.5005 -72.9997)" class="st4 st7 st9">SPIKECLEANER HIGH AMPLITUIDE NOISE == USER NOISE PERCENTAGE</text>
+		</g>
+		<g transform="translate(574.5005,49.2498)">
+			<text transform="matrix(0.8999 0 0 1 -455.4995 -19.9051)" class="st7 st10">HIGHEST MATCHES OF SPIKECLEANER WITH USER CURATION FOR HIGH AMPLITUDE THRESHOLD</text>
+		</g>
+		<g>
+			<path class="st11" d="M80.74,566.57l5.74-329.54l5.74-164.77h5.74h5.74h28.7h57.4h57.4h57.4H362h57.4h57.4h57.4h57.4H649h57.4
+				h57.4h57.4h57.4H936"/>
+			<circle class="st12" cx="80.74" cy="566.57" r="4"/>
+			<circle class="st12" cx="86.48" cy="237.03" r="4"/>
+			<circle class="st12" cx="92.22" cy="72.26" r="4"/>
+			<circle class="st12" cx="97.96" cy="72.26" r="4"/>
+			<circle class="st12" cx="103.7" cy="72.26" r="4"/>
+			<circle class="st12" cx="132.4" cy="72.26" r="4"/>
+			<circle class="st12" cx="189.8" cy="72.26" r="4"/>
+			<circle class="st12" cx="247.2" cy="72.26" r="4"/>
+			<circle class="st12" cx="304.6" cy="72.26" r="4"/>
+			<circle class="st12" cx="362" cy="72.26" r="4"/>
+			<circle class="st12" cx="419.4" cy="72.26" r="4"/>
+			<circle class="st12" cx="476.8" cy="72.26" r="4"/>
+			<circle class="st12" cx="534.2" cy="72.26" r="4"/>
+			<circle class="st12" cx="591.6" cy="72.26" r="4"/>
+			<circle class="st12" cx="649" cy="72.26" r="4"/>
+			<circle class="st12" cx="706.4" cy="72.26" r="4"/>
+			<circle class="st12" cx="763.8" cy="72.26" r="4"/>
+			<circle class="st12" cx="821.2" cy="72.26" r="4"/>
+			<circle class="st12" cx="878.6" cy="72.26" r="4"/>
+			<circle class="st12" cx="936" cy="72.26" r="4"/>
+		</g>
+		<g>
+			<path class="st2" d="M104.72,276.33h760.67V164.67H104.72V276.33z"/>
+		</g>
+		<g transform="translate(187.05,221.5005)">
+			<text transform="matrix(1.2102 0 0 1 -94.8791 304.8686)" class="st13 st8">Choose the last value on x-axis, where y-axis value elbows.</text>
+		</g>
+		<g transform="translate(187.05,221.5005)">
+			<text transform="matrix(0.8066 0 0 1 -95.0495 336.7065)" class="st14"><tspan x="0" y="0" class="st13 st15">We are trying to find a threshold for amplitude at and after user thinks the difference in absolute amplitude between </tspan><tspan x="0" y="21.6" class="st13 st15">channels is too high to be physiological</tspan><tspan x="292.03" y="21.6" class="st13 st16">.</tspan></text>
+		</g>
+	</g>
+</g>
+<circle class="st17" cx="92.25" cy="71.25" r="8.25"/>
+<text transform="matrix(1 0 0 1 103 90)" class="st18 st13 st8">Amplitude difference value between channels after which user thinks the differnce is are way too high= 500 uV</text>
+</svg>

@@ -7,38 +7,37 @@ function findACGallThreshold()
 % Here we run all the threshold values in a loop and match it with the user's curation, 
 % to see at which threshold user seem to agree the most with the algorithm.
 
-acgallsv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
-% % %% run classifyAllUnits with different ACG thresholds
-acgmax1=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
-baseThresholds = { ...
-    'lenient', ...   % ACG evaluation mode ('strict' or 'lenient')
-    0.7, ...         % maxHW: Half-width threshold in ms (will be overwritten)
-    50, ...          % minAmp: Minimum amplitude in uV
-    2000, ...        % maxAmp: Maximum amplitude in uV
-    200, ...         % minSlope: Minimum slope (uV/s)
-    0.05, ...        % firingThreshold: Minimum firing rate (Hz)
-    NaN, ...         % acgallthreshold: Threshold for all center bins vs shoulder
-    Noise, ...         % label for acgall: Noise or MUA:::from results from findACGallThreshold()
-    1.1 , ...         % acgmaxthreshold: Threshold for any center bin vs shoulder
-    Noise, ...         % label for acgany: Noise or MUA::: from results from findACGanyThreshold()..          
-    0.95              % correlation
-};
- 
-  
-
-ACGall=fullfile(pwd,'ACGall');
-if ~exist(ACGall,'dir')
-    mkdir(ACGall);
-end    
-for i = 1:numel(acgmax1)
-      
-    baseThresholds{7} = acgmax1(i);     % set minHW for this run
-    dz_classifyAllUnits(baseThresholds);
-
-    
-    dstFile = fullfile(ACGall, sprintf('ACGall_%0.2f.tsv', acgmax1(i)));
-    movefile(acgallsv, dstFile);
-end
+% acgallsv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
+% % % %% run classifyAllUnits with different ACG thresholds
+% acgmax1=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
+% 
+% baseThresholds = { ...
+%     'mode', 'lenient', ...
+%     'maxHW', 0.8, ...
+%     'minAmp', 50, ...
+%     'maxAmp', 500, ...
+%     'minSlope', 150, ...
+%     'firingThreshold', 0.05, ...
+%     'acgallthreshold', NaN, ...
+%     'acgalllabel', 'Noise', ...
+%     'corrThreshold', 0.95 ...
+% };
+% 
+%   
+% 
+% ACGall=fullfile(pwd,'ACGall');
+% if ~exist(ACGall,'dir')
+%     mkdir(ACGall);
+% end    
+% AcgallIdx = find(strcmp(baseThresholds,'acgallthreshold')) + 1;
+% 
+% for i = 1:numel(acgmax1)
+%     baseThresholds{AcgallIdx} = acgmax1(i);     
+%     dz_classifyAllUnits(baseThresholds{:});
+%     
+%     dstFile = fullfile(ACGall, sprintf('ACGall_%0.2f.tsv', acgmax1(i)));
+%     movefile(acgallsv, dstFile);
+% end
 
 
 %% Plotting
@@ -145,21 +144,61 @@ percentMatches_sorted2 = percentMatches(idx);
 
 % both together
 fig1 = figure;
-plot(thresholds_sorted, percentMatches_sorted1, '-o'); grid on;
-hold on;
-plot(thresholds_sorted, percentMatches_sorted2, '-s'); grid on;
+set(fig1, 'Position', [100 100 1100 700]);
+set(fig1,'Units','pixels');
+plot(thresholds_sorted, percentMatches_sorted1, '-o'); hold on; grid on;
+plot(thresholds_sorted, percentMatches_sorted2, '-s'); 
+
 xlabel('ACG all bins threshold');
-ylabel('Total matches for Noise/MUA labels(Only counting all ACG Bins being higher than the thershold)');
-title('Max allowed percentage in all centerbins required for users to think its still neuronal: Otherwise Noise/MUA');
+ylabel('Total matches for Noise/MUA labels');
+title({'Max allowed percentage in all center bins required for users to think it is still neuronal', ...
+       'Otherwise classified as Noise / MUA'});
+
 legend('Noise', 'MUA', 'Location', 'best');
 
-text(0.6, 80, {'Choose the label of the rising curve for this criteria and plug it in defaultThresholds in dz_ classifyAllUnits .', ...
-               'Choose the first value on x-axis, where y-axis value elbows and then platues.'}, ...
-     'FontSize', 10);
-% grid on;
+xLimits = xlim;
+yLimits = ylim;
+
+xPos = xLimits(1) + 0.05 * diff(xLimits);
+yPos = yLimits(1) + 0.70 * diff(yLimits);
+
+text(xPos, yPos, ...
+    {'Choose the label of the rising curve for this criterion and plug it into defaultThresholds in dzclassifyAllUnits.', ...
+     'Choose the first x-value where the y-value elbows and then plateaus.'}, ...
+    'FontSize', 10, ...
+    'BackgroundColor', 'w', ...
+    'EdgeColor', 'k', ...
+    'Margin', 10);
+
+set(gca,'LooseInset',max(get(gca,'TightInset'),0.02));
+set(fig1,'PaperPositionMode','auto');
+
+
+print(fig1, fullfile(pwd,'ACGall','ACGall_Noise_vs_MUA'), '-dsvg');
+
+
+
+
+
+
+
+
 
 %saving
-saveas(fig1, fullfile(pwd,'ACGall', 'ACGall_Noise_vs_MUA.png'));
+% saveas(fig1, fullfile(pwd,'ACGall','ACGall_Noise_vs_MUA.svg'));
+
+% saveas(fig1, fullfile(pwd,'ACGall', 'ACGall_Noise_vs_MUA.fig'));
+
+%% save as csv
+acgallTable = table( ...
+    thresholds_sorted(:), ...
+    percentMatches_sorted1(:), ...
+    percentMatches_sorted2(:), ...
+    'VariableNames', {'ACGallThreshold','PercentNoiseMatches','PercentMUAMatches'});
+
+writetable(acgallTable, fullfile(pwd,'ACGall','ACGall_NoiseThreshold.csv'));
+
+
 
 
 end

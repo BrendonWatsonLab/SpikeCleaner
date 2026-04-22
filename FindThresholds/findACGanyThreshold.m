@@ -7,30 +7,30 @@ function findACGanyThreshold()
 acganysv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
 % % %% run classifyAllUnits with different ACG thresholds
 acgmax2=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
-baseThresholds = { ...
-    'lenient', ...   % ACG evaluation mode ('strict' or 'lenient')
-    0.7, ...         % minHW: Half-width threshold i ms (will be overwritten)
-    50, ...          % minAmp: Minimum amplitude in uV
-    2000, ...        % maxAmp: Maximum amplitude in uV
-    200, ...         % minSlope: Minimum slope (uV/ms)
-    0.05, ...        % firingThreshold: Minimum firing rate (Hz)
-    0.9, ...         % acgallthreshold: Threshold for all center bins vs shoulder
-    Noise, ...         % label for acgall: Noise or MUA:::from results from findACGallThreshold()
-    NaN ...          % acgmaxthreshold: Threshold for any center bin vs shoulder
-    Noise, ...         % label for acgany: Noise or MUA::: from results from findACGanyThreshold()..          
-    0.95              %correlation
-};
 
+baseThresholds = { ...
+    'mode', 'lenient', ...
+    'maxHW', 0.7, ...
+    'minAmp', 50, ...
+    'maxAmp', 2000, ...
+    'minSlope', 150, ...
+    'firingThreshold', 0.05, ...
+    'acganythreshold', NaN, ...
+    'acganyLabel', 'Noise', ...
+    'corrThreshold', 0.95 ...
+};
 
 ACGany=fullfile(pwd,'ACGany');
 if ~exist(ACGany,'dir')
     mkdir(ACGany);
-end    
-for i = 1:numel(acgmax2)
-      
-    baseThresholds{8} = acgmax2(i);     % set minHW for this run
-    dz_classifyAllUnits(baseThresholds);
+end   
+AcganyIdx = find(strcmp(baseThresholds,'acganythreshold')) + 1;
 
+for i = 1:numel(acgmax2)
+    
+    baseThresholds{AcganyIdx} = acgmax2(i);     % set minHW for this run
+    dz_classifyAllUnits(baseThresholds{:});
+    
     dstFile = fullfile(ACGany, sprintf('ACGany_%0.2f.tsv', acgmax2(i)));
     movefile(acganysv, dstFile);
 end

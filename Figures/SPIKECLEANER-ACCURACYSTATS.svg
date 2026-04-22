@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 29.8.2, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 612 236.35" style="enable-background:new 0 0 612 236.35;" xml:space="preserve">
+<style type="text/css">
+	.st0{font-family:'TimesNewRomanPS-BoldMT';}
+	.st1{font-size:14px;}
+	.st2{fill:none;stroke:#000000;stroke-miterlimit:10;}
+	.st3{fill:url(#SVGID_1_);}
+	.st4{fill:url(#SVGID_00000048459385856256852250000002649791303057040794_);}
+	.st5{font-family:'TimesNewRomanPSMT';}
+	.st6{font-size:12px;}
+</style>
+<text transform="matrix(1 0 0 1 130.6507 28.9772)" class="st0 st1">SPIKECLEANER PREDICTION ACCURACY STATISTICS</text>
+<rect x="48" y="47.09" class="st2" width="521" height="162"/>
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="49" y1="109.91" x2="151.61" y2="109.91" gradientTransform="matrix(1 0 0 -1 0 238)">
+	<stop  offset="0" style="stop-color:#FFFFFF"/>
+	<stop  offset="1" style="stop-color:#000000"/>
+</linearGradient>
+<rect x="49" y="48.09" class="st3" width="102.61" height="160"/>
+<linearGradient id="SVGID_00000068652533209564294440000000779632421277264013_" gradientUnits="userSpaceOnUse" x1="48" y1="178.63" x2="569.57" y2="178.63" gradientTransform="matrix(1 0 0 -1 0 238)">
+	<stop  offset="0" style="stop-color:#FFFFFF"/>
+	<stop  offset="0.6181" style="stop-color:#000000;stop-opacity:0.5"/>
+</linearGradient>
+<polygon style="fill:url(#SVGID_00000068652533209564294440000000779632421277264013_);" points="569.57,48.09 569.57,70.65 
+	48,70.65 48,48.09 "/>
+<text transform="matrix(1 0 0 1 64.3044 92.5156)" class="st5 st6">ACCURACY</text>
+<text transform="matrix(1 0 0 1 66.3652 124.3171)" class="st5 st6">PRECISION</text>
+<text transform="matrix(1 0 0 1 90.8872 188.9193)" class="st5 st6">F1</text>
+<text transform="matrix(1 0 0 1 74.7802 158.1308)" class="st5 st6">RECALL</text>
+<text transform="matrix(1 0 0 1 169.9566 63.1546)" class="st5 st6">ALL CATERGORIES</text>
+<text transform="matrix(1 0 0 1 315.6969 62.2933)" class="st5 st6">GOOD Vs REST</text>
+<text transform="matrix(1 0 0 1 433.8011 61.2066)" class="st5 st6">GOOD + MUA Vs NOISE</text>
+<text transform="matrix(1 0 0 1 208.6456 93.9365)" class="st5 st6">0.97</text>
+<text transform="matrix(1 0 0 1 208.3042 125.6958)" class="st5 st6">0.99</text>
+<text transform="matrix(1 0 0 1 209.0827 156.8818)" class="st5 st6">0.87</text>
+<text transform="matrix(1 0 0 1 209.9069 188.7475)" class="st5 st6">0.92</text>
+<text transform="matrix(1 0 0 1 348.7429 94.0862)" class="st5 st6">0.97</text>
+<text transform="matrix(1 0 0 1 348.9277 127.1259)" class="st5 st6">0.99</text>
+<text transform="matrix(1 0 0 1 348.0883 157.0379)" class="st5 st6">0.87</text>
+<text transform="matrix(1 0 0 1 348.865 188.6677)" class="st5 st6">0.92</text>
+<text transform="matrix(1 0 0 1 490.7312 90.8741)" class="st5 st6">0.97</text>
+<text transform="matrix(1 0 0 1 491.1668 124.063)" class="st5 st6">0.95</text>
+<text transform="matrix(1 0 0 1 490.3842 156.044)" class="st5 st6">0.96</text>
+<text transform="matrix(1 0 0 1 491.2748 185.702)" class="st5 st6">0.95</text>
+</svg>

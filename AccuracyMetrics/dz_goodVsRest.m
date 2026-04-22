@@ -67,12 +67,14 @@ precision = TP / (TP + FP + eps);
 recall = TP / (TP + FN + eps);
 f1_score = 2 * (precision * recall) / (precision + recall + eps);
 
-%confusion matrix
+% confusion matrix
 confusionMat = [TP, FN; FP, TN];
-disp('Confusion Matrix:');
-disp(array2table(confusionMat, ...
+confusion_table = array2table(confusionMat, ...
     'VariableNames', {'Predicted_Good', 'Predicted_NotGood'}, ...
-    'RowNames', {'Actual_Good', 'Actual_NotGood'}));
+    'RowNames', {'Actual_Good', 'Actual_NotGood'});
+
+disp('Confusion Matrix:');
+disp(confusion_table);
 
 %metrics
 fprintf('\nMetrics:\n');
@@ -85,6 +87,8 @@ fprintf('Precision: %.4f\n', precision);
 fprintf('Recall: %.4f\n', recall);
 fprintf('F1 Score: %.4f\n', f1_score);
 
+metricsTable = table(accuracy, precision, recall, f1_score, ...
+    'VariableNames', {'Accuracy','Precision','Recall','F1_Score'});
 
 %%%%%%%%%creating a new file according to cluster ids for comparison btw algo's and expert's decision
 merged.fp_fn = repmat("", height(merged), 1);
@@ -111,5 +115,62 @@ end
 %metrics of match or no match to be imported in PHY
 outFile = fullfile(pwd, sprintf('GoodvsRest_%s.tsv', username));
 writetable(resultTable, outFile, 'Delimiter', '\t', 'FileType', 'text');
+
+
+
+
+
+%% saving
+Accuracy=fullfile(pwd,'Accuracy');
+if ~exist(Accuracy,'dir')
+    mkdir(Accuracy);
+end 
+figSummary = figure('Position',[100 100 700 420]);
+
+% ===== MAIN TITLE =====
+annotation(figSummary,'textbox',[0.25 0.94 0.5 0.05], ...
+    'String','Confusion Matrix and Classification Metrics', ...
+    'EdgeColor','none', ...
+    'HorizontalAlignment','center', ...
+    'FontWeight','bold', ...
+    'FontSize',12);
+
+% ===== CONFUSION MATRIX TITLE =====
+annotation(figSummary,'textbox',[0.35 0.82 0.3 0.04], ...
+    'String','Confusion Matrix', ...
+    'EdgeColor','none', ...
+    'HorizontalAlignment','center', ...
+    'FontWeight','bold');
+
+% ===== CONFUSION MATRIX TABLE =====
+uitable('Parent', figSummary, ...
+        'Data', confusionMat, ...
+        'RowName', confusion_table.Properties.RowNames, ...
+        'ColumnName', confusion_table.Properties.VariableNames, ...
+        'Units','normalized', ...
+        'Position',[0.12 0.50 0.76 0.30]);
+
+% ===== METRICS TITLE =====
+annotation(figSummary,'textbox',[0.35 0.42 0.3 0.04], ...
+    'String','Classification Metrics', ...
+    'EdgeColor','none', ...
+    'HorizontalAlignment','center', ...
+    'FontWeight','bold');
+
+% ===== METRICS TABLE =====
+uitable('Parent', figSummary, ...
+        'Data', table2cell(metricsTable), ...
+        'ColumnName', metricsTable.Properties.VariableNames, ...
+        'Units','normalized', ...
+        'Position',[0.22 0.18 0.56 0.18]);
+
+set(figSummary,'PaperPositionMode','auto');
+
+saveas(figSummary, fullfile(pwd,'Accuracy', sprintf('goodVsRest_summary_%s.png', username)));
+
+
+
+
+
 
 end

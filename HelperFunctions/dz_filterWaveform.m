@@ -74,30 +74,9 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
 
         % Define neighborhood:  instead of just  the max channel use max+/-3 to find corr with rest of the channels
         % store only the highestcorr from that
-        %refWf = waveforms1(:, maxCh); 
         corrValues = corr(bestWaveform1, waveforms);
         corrValues(:,maxCh) = 0; %zeroing out the self correlation
         
-%         neigh = 3;
-%         refChannels = maxCh + (-neigh:neigh);
-%         refChannels(refChannels < 1 | refChannels > numChannels) = []; % keep valid
-%         correlation=cell(length(refChannels),1);
-%         for i=1:numel(refChannels)
-%             x=refChannels(i);
-%             refWf = waveforms1(:, x);  % 81x1
-%             corrValues = zeros(1, numChannels);     % 1x128
-%             corrValues = corr(refWf, waveforms1);
-%             corrValues(:,x) = 0; %zeroing out the self correlation
-%             correlation{i} = corrValues;
-%         end    
-%         
-%         corre=cell2mat(correlation);
-%         cors=max(corre);
-%         % Sum of correlations per ref channel
-%         rowSums = sum(corre, 2);         % 1 sum per row/ref channel
-%         
-        % Find the index of the ref channel with highest total correlation
-        %[maxScore, bestRefIdx] = max(rowSums);     % bestRefIdx = row in corrMa
         %full matrix
         channelCorrelations{ix} = corrValues;   % max channel amoungst the max+/-3chans
 
