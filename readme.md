@@ -199,7 +199,7 @@ Percentage of noise and multi-unit activity (MUA) clusters removed at each step 
 
 
 **Figure4: Pipeline Step-wise Statistics**
-![Pipeline Statistics](Figures/SpikeCleaner_pipelinetable.svg)
+![Pipeline Statistics](Figures/SpikeCleaner_stepwise_stats_table.svg)
 
 ### Comparing SpikeCleaner to User Curation:
 1. Go ahead and open PHY from within the SpikeCleaner folder and Curate the clusters into : Noise,Good,MUA. Don't go ahead with split and merge just yet.
