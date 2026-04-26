@@ -53,7 +53,6 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ```
 ## Setup
 - After running Spike Sorting, CD to  you data folder.
-- Make sure that your .dat file is of your folder name.
 - Add SpikeCleaner folder to path in MATLAB: **addpath(genpath('path'))**
 - Run **dz_runFirst**: This will create a folder for SpikeCleaner in your data folder, and copy all the necessary files in that from all the subfodlers:**dat file, spike_clusters.npy,spike_times.npy, channel_map.npy,channel_positions.npy, pc_features.npy, templates.npy, spike_templates.npy, whitening_mat.npy,whitening_mat_inv.npy,similar_templates.npy,params.py ** and creates **parameters.mat** containing information like number channels, sampling rate and animal name.
 - Run **dz_classifyUnitsAll()**.
@@ -199,7 +198,9 @@ Percentage of noise and multi-unit activity (MUA) clusters removed at each step 
 
 
 **Figure4: Pipeline Step-wise Statistics**
-![Pipeline Statistics](Figures/SpikeCleaner_stepwise_stats_table.svg)
+This is an example of how you will be able to observe your results. This gives you the survived count of units for MUA+Good and Good.
+
+<img src="Figures/SpikeCleaner_stepwise_stats_table.svg" width="800">
 
 ### Comparing SpikeCleaner to User Curation:
 1. Go ahead and open PHY from within the SpikeCleaner folder and Curate the clusters into : Noise,Good,MUA. Don't go ahead with split and merge just yet.
@@ -296,7 +297,7 @@ Sampling Rate: 20KHz
 
 Calculated Time: ~5.5 hours long.
 
-**Results were averaged over 2 experts and 3 data sets:**
+**Results were averaged over 2 experts and 3 datasets:**
 
 **Figure13: Metrics Single Units Vs Rest between the algorithm and experts users**
 ![Accuracy Metrics](Figures/SPIKECLEANER-ACCURACYSTATS.svg)
