@@ -287,6 +287,7 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 ## Metrics of Match with Expert Users
 
 **Rodents-Grass Rats:** Harald,Hafdan,Canute 
+
 **Neural Recording Information:**
 
 Recording Size: 102 GB
@@ -297,7 +298,7 @@ Sampling Rate: 20KHz
 
 Calculated Time: ~5.5 hours long.
 
-**Results were averaged over 2 experts and 3 datasets:**
+**Results were averaged over 2 experts and 3 data sets:**
 
 **Figure13: Metrics Single Units Vs Rest between the algorithm and experts users**
 ![Accuracy Metrics](Figures/SPIKECLEANER-ACCURACYSTATS.svg)
