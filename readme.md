@@ -47,18 +47,18 @@ SpikeCleaner/
 ```
 
 ## Installation
-
-
-
+- Install in your code folder.
 ```bash
 git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ```
 ## Setup
 - After running Spike Sorting, CD to  you data folder.
+- Make sure that your .dat file is of your folder name.
 - Add SpikeCleaner folder to path in MATLAB: **addpath(genpath('path'))**
 - Run **dz_runFirst**: This will create a folder for SpikeCleaner in your data folder, and copy all the necessary files in that from all the subfodlers:**dat file, spike_clusters.npy,spike_times.npy, channel_map.npy,channel_positions.npy, pc_features.npy, templates.npy, spike_templates.npy, whitening_mat.npy,whitening_mat_inv.npy,similar_templates.npy,params.py ** and creates **parameters.mat** containing information like number channels, sampling rate and animal name.
 - Run **dz_classifyUnitsAll()**.
 - Thresholds are pre-set but can be updated. We have made two versions available: **lenient** and **strict**. 
+- This will ask you the number of channels you want to consider according to your probe and shank geometry.
 - The first  time you run the code, it  is going to create mat files for filtered waveforms and ACGs,which might take some time, and then use them for every consecutive run.
 - To be able to  run the comparison codes in  **AccuracyMetrics**, manually curate with PHY in SpikeCleaner folder and then call functions for  **dz_goodVsRest(), dz_allCats(),dz_neuronalvsN()** from inside the SpikeCleaner folder, which will ask you to enter your name, it's necessary for display in PHY for you to compare between your's and SpikeCleaner's labels. It will output Metrics files which will prompt Match/No Match between your's and SpikeCleaners labelling and which will also be imported in PHY and can be used to navigate.
 - To be able to run codes from **FindThresholds** , manually curate with PHY in SpikeCleaner folder and then call functions for  **findCorrelationThreshold(),findAmplitudeThreshold(), findHalfWidthThreshold(),findSlopeThreshold(),findACGallThreshold()** from your main animal folder.
@@ -68,6 +68,10 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ### Inputs
 - `spike_clusters.npy` (Output from Kilosort)
 - `spike_times.npy` (Output from Kilosort)
+- `channel_positions.npy` (Output from Kilosort)
+- `channel_map.npy` (Output from Kilosort)
+- `spike_templates.npy` (Output from Kilosort)
+- `templates.npy` (Output from Kilosort)
 - `parameters.mat` (Output from dz_runFirst())
 - `cluster_group.tsv` (PHY manual curation labels)
 
@@ -129,7 +133,7 @@ minAmp=50;%%uV Minimum amplitude threshold : Otherwise Noise
 
 maxAmp=500;%%uV Maximum amplitude threshold for allowed difference between channels : Otherwise Noise
 
-minSlope=100;%uV/ms  Minimum slope threshold : Otherwise Noise
+minSlope=150;%uV/ms  Minimum slope threshold : Otherwise Noise
 
 acgallthreshold=1;% 100% : threshold for all the center bins compared to the shoulder peak: All center bins should be less than 100% of shoulder bins
 : Otherwise Noise/MUA
@@ -141,7 +145,9 @@ dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)
 ### Core Processing (`dz_Curate.m`)
 This is the first function that is called upon:
 
-1. **Data Loading**: Loads spike times (`spike_times.npy`), cluster IDs (`spike_clusters.npy`), and `parameters.mat`, obtains the active channels and sampling frequency. Calls `dz_getWaveform.m` to obtain raw waveforms ±2ms long [Time samples, Active Channels]. Calls `dz_filterWaveform.m` to filter the extracted waveforms: saves channel correlations with the highest amplitude channel,highest waveform channel, highest waveform channel id, raw waveforms-high pass filtered, smoothened waveforms (high+low) filtered. Both are saved in **SpikeCleaner/Outputs/**. After the first run `dz_Curate.m` refers the **Output/** to check if the above files exists and just loads them. 
+1. **Data Loading**: Loads spike times (`spike_times.npy`), cluster IDs (`spike_clusters.npy`), and `parameters.mat`, obtains the active channels and sampling frequency. Also loads `channel_positions.npy`,`channel_map.npy`,`templates.npy`, `spike_templates.npy`
+Calls `dz_getWaveform.m` to obtain raw waveforms ±2ms long [Time samples, Active Channels]. Calls `dz_filterWaveform.m` to first extract the active channels from `channel_map.npy` and filter extracted waveforms from those channels. Secondly it uses the templates to obtain the channel with maximum amplitude waveform and then choose that channel from filtered waveforms as the maximum amplitude channel.It saves the channel correlations with the
+highest amplitude channel, also saves highest amplitude waveform channel, highest amplitude waveform channel id, raw waveforms-high pass filtered, smoothened waveforms (high+low) filtered. Both are saved in **SpikeCleaner/Outputs/**. After the first run `dz_Curate.m` refers the **Output/** to check if the above files exists and just loads them. 
 
 2. **Calculating all Waveform Metrics**: `dz_Curate.m` internally calls `dz_extractWfVariables.m` and gets metrics like : amplitude,halfwidth,slope,spike type, noise reasons, maximum amplitude channel and 10 near by channel range from it.
 
@@ -163,7 +169,7 @@ e. **Waveform Slope Evaluation**: Internally calls `dz_analyzeSlope` to check th
 
 f. **ACG Empty Evaluation**: Internally calls `dz_acgEmpty` to check whether > 50% of ACG have empty bins. This means that the neuron cluster has been sparsely firing and probably an over split unit and not a biologically plausible cluster, otherwise flags the cluster as Noise. 
 
-g. **ACG Center Fill Evaluation**: Internally calls `dz_acgAllCheck` to check whether all the center bin proportions, i.e, center bins Vs should bins, are < **acgallthershold**, otherwise flags the cluster as Noise/MUA, this depends on your data, you need to run the thershold curves to know for sure. In most cases when ACG is really bad, mostly the cluster is entirely Noise. 
+g. **ACG Center Fill Evaluation**: Internally calls `dz_acgAllCheck` to check whether all the center bin proportions, i.e, center bins Vs should bins, are < **acgallthershold**, otherwise flags the cluster as Noise/MUA, this depends on your data, you need to run the threshold curves to know for sure. In most cases when ACG is really bad, mostly the cluster is entirely Noise. 
 
 h. **MUA Evaluation**: Internally calls `dz_muaCheck`, which checks for which **acgEvaluationMode** in **linient mode** it checks whether the center bin proportions at positions +/- 2ms from the 0th bin are <30% and the positions at 0th and +/-1ms bins are <20%. In in **strict mode** it checks whether all the center bin proportions are < 5%. If not it labels the cluster as MUA.
 
@@ -206,7 +212,7 @@ If and when user thinks the standard thersholds are working very well for their 
 
 For threshold check, user need to call the functions in an order and update the threshold from the previous checks to the next level of check.
 
-1. **findCorrelationThreshold()**: Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the correlation thersholds and saves the **cluster_Spikereasons.tsv** for each run in **Correlation/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of Correlation thershold, i.e, when maximum spike channel is too correlated to all other channels, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
+1. **findCorrelationThreshold()**: Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the correlation thresholds and saves the **cluster_Spikereasons.tsv** for each run in **Correlation/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of Correlation threshold, i.e, when maximum spike channel is too correlated to all other channels, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
 This function will plot and save the %Matches Vs Thresholds in the **Correlation/**
 You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the thershold use that for running the next steps.
 
@@ -214,33 +220,33 @@ You can refer to the plot below to understand how to choose thresholds on your o
 <img src="Figures/Correlation_NoiseThreshold.svg" width="1000">
 
 2. **findAmplitudeThreshold()**: Open the function and edit the value of correlation thershold that you found from the previous step. 
-Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the half-width thersholds and saves the **cluster_Spikereasons.tsv** for each run in **Amplitude/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of amplitude difference between channels, i.e, amplitude difference between near by channels is too high, one channel might be abnormally huge, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
+Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the half-width thresholds and saves the **cluster_Spikereasons.tsv** for each run in **Amplitude/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of amplitude difference between channels, i.e, amplitude difference between near by channels is too high, one channel might be abnormally huge, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
 This function will plot and save the %Matches Vs Thresholds in the **Amplitude/**
-You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the thershold use that for running the next steps.
+You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the threshold use that for running the next steps.
 
 **Figure6: Amplitude Threshold Plot**
 <img src="Figures/Amplitude_NoiseThreshold.svg" width="1000">
 
 3. **findHalfWidthThreshold()**: Open the function and edit the value of amplitude thershold that you found from the previous step. 
-Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the half-width thersholds and saves the **cluster_Spikereasons.tsv** for each run in **HalfWidth/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of half-width thershold, i.e, halfwidth too wide for the spike to be physiological, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
+Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the half-width thresholds and saves the **cluster_Spikereasons.tsv** for each run in **HalfWidth/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of half-width threshold, i.e, halfwidth too wide for the spike to be physiological, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
 This function will plot and save the %Matches Vs Thresholds in the **HalfWidth/**
 You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the thershold use that for running the next steps.
 
 **Figure7: Half-Width Threshold Plot**
 <img src="Figures/HalfWidth_NoiseThreshold.svg" width="1000">
 
-4. **findSlopeThreshold()**: Open the function and edit the value of half-width thershold that you found from the previous step. 
-Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the slope thersholds and saves the **cluster_Spikereasons.tsv** for each run in **Slope/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of slope thershold, i.e, slope being too low,spike waveform being too slow to be physiological, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
+4. **findSlopeThreshold()**: Open the function and edit the value of half-width threshold that you found from the previous step. 
+Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the slope thresholds and saves the **cluster_Spikereasons.tsv** for each run in **Slope/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of slope threshold, i.e, slope being too low,spike waveform being too slow to be physiological, and match that to when ever user thinks its Noisy. We want to find the threshold that can maximize the matches. 
 This function will plot and save the %Matches Vs Thresholds in the **Slope/**
-You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the thershold use that for running the next steps.
+You can refer to the plot below to understand how to choose thresholds on your own data. Once you have the threshold use that for running the next steps.
 
 **Figure8: Slope Threshold Plot**
 <img src="Figures/Slope_NoiseThreshold.svg" width="1000">
 
-5. **findACGallThreshold()**: Open the function and edit the value of slope thershold that you found from the previous step. 
-Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the ACGall thersholds and saves the **cluster_Spikereasons.tsv** for each run in **ACGall/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of ACGall thershold, i.e, all ACG bins are above a certain percentage of the side bins/should bins, ACG is too filled, and match that to when ever user thinks its Noisy/MUA. Also calculate if user thinks this condition is Noise/MUA. We want to find the threshold and curation label that can maximize the matches. 
+5. **findACGallThreshold()**: Open the function and edit the value of slope threshold that you found from the previous step. 
+Call this function from the data folder, where you can see already see the subfolder for **SpikeCleaner**. This function runs the entire algorithm for all the ACGall thresholds and saves the **cluster_Spikereasons.tsv** for each run in **ACGall/** and compares the user curations to them, to match which threshold makes the user curations most like the algorithm curations. We compare when ever algorithm thinks the cluster is Noisy because of ACGall threshold, i.e, all ACG bins are above a certain percentage of the side bins/should bins, ACG is too filled, and match that to when ever user thinks its Noisy/MUA. Also calculate if user thinks this condition is Noise/MUA. We want to find the threshold and curation label that can maximize the matches. 
 This function will plot and save the %Matches Vs Thresholds in the **ACGall/**
-You can refer to the plot below to understand how to choose thresholds and labels on your own data. Once you have the thershold use that for running the next steps.
+You can refer to the plot below to understand how to choose thresholds and labels on your own data. Once you have the threshold use that for running the next steps.
 
 **Figure9: ACGall Threshold Plot**
 <img src="Figures/ACGall_Noise_vs_MUA.svg" width="1000">
@@ -267,7 +273,7 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 
 ## Results
 
-**Figure10: PHY View: Autocorrelogram Classification: It uses shoulder peaks to get the proportions of voilations in the center.**
+**Figure10: PHY View: Autocorrelogram Classification: It uses shoulder peaks to get the proportions of violations in the center.**
 
 ![PHY View](Figures/acgclassification.png)
 
@@ -290,15 +296,10 @@ Sampling Rate: 20KHz
 
 Calculated Time: ~5.5 hours long.
 
-**Results were averaged over 2 experts and 3 datasets:**
+**Results were averaged over 2 experts and 3 data sets:**
 
 **Figure13: Metrics Single Units Vs Rest between the algorithm and experts users**
 ![Accuracy Metrics](Figures/SPIKECLEANER-ACCURACYSTATS.svg)
-
-## Failure Scenarios
-**Figure14:Algorithm at this point can't process edge case of this kind, it will choose one full spike, if it passes all the threshold barriers and ACG has no refractory period voilations, it will consider that as a Good/Single Unit cluster.**
-![PHY View-Edge Case](Figures/edgecase1.png)
-
 
 ## Acknowledgements
 

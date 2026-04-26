@@ -1,4 +1,4 @@
-function dz_filterWaveform(inputFile, outputFile, samplingRate)
+function dz_filterWaveform(inputFile, outputFile, samplingRate,chanMap,templates,clu,spikeTemp,uclu)
     % Function to  filter waveforms:
     % Parameters:
     % inputFile      - Input .mat file containing waveforms ('wf')
@@ -13,13 +13,16 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
     end
     
 
+    
     % Initialize storage for results
     clippedWaveforms = cell(length(wf), 1); %highpass
     meanWaveforms = cell(length(wf), 1);
     bestWaveforms = cell(length(wf), 1);
     channelCorrelations = cell(length(wf), 1);
+    activeChannelsUsed = cell(length(wf), 1);
     % Smoothing parameters (Moving Average Filter)
     windowSize =9;
+    activeRawCh = double(chanMap) + 1;   % 0-based to MATLAB indexing
   
     %% Implementation in phy: highpass at 150Hz
     % Cutoff Frequency (in Hz)
@@ -46,9 +49,23 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
 
         %%  Extract waveforms for the current cluster
         waveforms = wf{ix};
-        waveforms1=wf{ix}; %saving unfiltered
+          % Keep only Kilosort active channels
+        validActiveCh = activeRawCh(activeRawCh >= 1 & activeRawCh <= size(waveforms,2));
+        waveforms = waveforms(:, validActiveCh);
+        activeChannelsUsed{ix} = validActiveCh;
+  
         [numSamples, numChannels] = size(waveforms);
-       
+        
+        %%choosing max chan from templates
+        actualclusterid=uclu(ix);
+        templateids=spikeTemp(clu==actualclusterid);
+        mainTemplate = mode(templateids);
+        thisTemplate = squeeze(templates(mainTemplate + 1,:,:));  % +1 for MATLAB
+        templateAmp = max(thisTemplate,[],1) - min(thisTemplate,[],1);    
+        
+        [~,maxCh]=max(templateAmp);
+   
+  
 
         %% High-Pass Filter to remove high-frequency noise
         for ch = 1:numChannels
@@ -64,8 +81,8 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
         meanWaveforms{ix} = waveforms1;%filtered highpass + movemean  smoothening
 
         %% Find the channel with the highest amplitude waveform
-        amplitudes = max(waveforms, [], 1) - min(waveforms, [], 1);
-        [~, maxCh] = max(amplitudes);
+%         amplitudes = max(waveforms, [], 1) - min(waveforms, [], 1);
+%         [~, maxCh] = max(amplitudes);
         bestWaveformsChannel{ix} = maxCh;  % best  wf  channel
 
         %% Calculate correlations between the best waveform and all other channels
@@ -87,6 +104,7 @@ function dz_filterWaveform(inputFile, outputFile, samplingRate)
     results.bestWaveformsChannel = bestWaveformsChannel;
     results.bestWaveforms = bestWaveforms;
     results.channelCorrelations = channelCorrelations;
+    results.activeChannelsUsed = activeChannelsUsed;
  
     % Save all results to the output file
     save(outputFile, '-struct', 'results');

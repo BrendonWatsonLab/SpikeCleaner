@@ -1,5 +1,5 @@
 %% extract waveform variables
-function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos)  
+function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos,nLocalChannels)  
 
 
     %extracting the waveforms::: in uV
@@ -50,7 +50,7 @@ function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,c
         bestPos = pos(bestCh,:);           
         d = sqrt(sum((pos - bestPos).^2,2));
         [~, idx] = sort(d);
-        chRange = idx(1:11); 
+        chRange = idx(1:nLocalChannels); 
         chRangeWaveforms=waveforms(:,chRange);
         
  

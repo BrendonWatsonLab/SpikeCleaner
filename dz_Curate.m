@@ -1,5 +1,5 @@
 %%%By Diksha Zutshi--modified for chenaging tetsing order
-function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
+function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
         
     %%Algorithm flow:
     %1 Check for firing rate for non-biological clusters-noise
@@ -26,13 +26,12 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
 
 
     %% ACTIVE CHANENLS:  to only use the active channels
-    % === Load rez to access channel map ===
+    % === Load parameters.mat  ===
     param=fullfile(a,'parameters.mat');
     load(param, 'parameters');
 
     nChannels = parameters.nChannels;
     fs=parameters.samplingRate;
-    %parameters={totalChannels,fs};
 
     
     %% Load spike times
@@ -48,7 +47,12 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
         
     posfil= [a filesep 'channel_positions.npy'];
     pos = readNPY(posfil);   % Nx2 matrix
-    
+    chanfil=[a filesep 'channel_map.npy'];
+    chanMap=readNPY(chanfil); 
+    tempfil= [a filesep 'templates.npy'];
+    templates=readNPY(tempfil); 
+    spiketempfil=[a filesep 'spike_templates.npy'];
+    spikeTemp=readNPY(spiketempfil); 
     % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %% Initialize variables
     uclu = unique(clu);
@@ -58,9 +62,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
     Reasons = cell(nclu, 1); %%%this will hold reasons why a cluster isn't Good.
     passReason=[];
     
-    
-
-   
+  
     %% LOW FIRING RATE:
     %%%RECORDING SIZE
     % Calculate the recording duration
@@ -89,7 +91,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
     if ~exist(outputfile,'file')
         [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters);  
         save(outputFileName, 'wf');
-        dz_filterWaveform(outputFileName, outputfile,fs);
+        dz_filterWaveform(outputFileName, outputfile,fs,chanMap,templates,clu,spikeTemp,uclu);%% we only want the active channels for building max chan
         wfdata=load(outputfile); 
     else
         wfdata=load(outputfile); 
@@ -98,9 +100,10 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
     clippedWaveforms = wfdata.clippedWaveforms;
     wfs=length(clippedWaveforms);    
     channelCorrelations = wfdata.channelCorrelations;
+    activeChannelsUsed= wfdata.activeChannelsUsed;
     corrCell=cell(nclu, 1);
     %% Extracting 3 point waveform and waveform features
-    [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos);  
+    [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos,nLocalChannels);  
     
     %% Extracting ACG proportions
     acgfile = fullfile(outputsDir, basename + "acg.mat");
@@ -137,10 +140,10 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
     end
    
     %% correlation
-    function dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos)
+    function dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos,nLocalChannels)
         bestWaveformsChannel=wfdata.bestWaveformsChannel;
         for ix=1:wfs
-%             actualindex=99;
+%             actualindex=41;
 %             ix = find(uclu == actualindex);
             corrValues = channelCorrelations{ix};
             thisBestChannel = bestWaveformsChannel{ix};
@@ -155,7 +158,8 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
             
             d = sqrt(sum((pos - bestPos).^2,2));
             [~, idx] = sort(d);
-            chRange = idx(1:11);   % best channel + 10 neighbors      
+            chRange = idx(1:min(nLocalChannels,length(idx)));
+            %chRange = idx(1:11);   % best channel + 10 neighbors      
             localCorrValues = corrValues(chRange);
             localCorrValues=localCorrValues(2:end);
             totalChannels = length(localCorrValues);
@@ -182,6 +186,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
 %             actualindex=157;
 %             ix = find(uclu == actualindex);
             thisAmplitude=amplitudes{ix}; 
+            thisAmplitude=round(thisAmplitude);
             
             if ~good(ix) 
                 continue;
@@ -196,7 +201,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
             numHighAmpDiff = sum(Diff > maxAmp);
             percentHighAmpDiff = (numHighAmpDiff / totalChannels) * 100;
             
-            if (percentHighAmpDiff>70) || thisAmplitude <= minAmp
+            if (percentHighAmpDiff>70) || thisAmplitude < minAmp
                 noiseReasons{ix} = 'Noise';
                 Reasons{ix} = sprintf('Amplitude is too low or all local channel differences exceed %.3f uV', maxAmp);
                 good(ix) = false;
@@ -262,7 +267,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
              if ~good(ix)
                 continue;
              else
-%                  actualindex=9;
+%                  actualindex=26;
 %                  ix = find(uclu == actualindex);
                  thisEmpty=isEmpty(ix);  
                  thisProportion=Proportions{ix};
@@ -390,7 +395,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
                 radarLabels{k} = 'Low Firing';
 
             case 'correlation'               
-                 dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos);
+                 dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos,nLocalChannels);
                  radarLabels{k} = 'Correlation';
 
             case 'amplitude'  

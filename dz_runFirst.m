@@ -1,6 +1,6 @@
 function dz_runFirst(curdir)
 %%By Diksha Zutshi
-%run first: to chnage the shame of the data folder to make it compatible.
+%run first: to create a SpikeCleaner folder with the required files.
 rootdir=fileparts(mfilename('fullpath'));
 addpath(genpath(rootdir));
 
@@ -22,6 +22,9 @@ requiredFiles={
 'whitening_mat.npy'
 'whitening_mat_inv.npy'
 'similar_templates.npy'
+'templates_ind.npy'
+'channel_shanks.npy'
+'pc_feature_ind.npy'
 };
 %%create SpikeCleaner folder
 outputDir=fullfile(curdir,'SpikeCleaner');
@@ -80,17 +83,10 @@ if isempty(matchIdx)
         
     else
          %%copy file to SpikeCleaner folder
-        src=fullfile(hits.folder,hits.name);
-        %copyfile(src,fullfile(outputDir,fullname));
-        %fprintf('Copied %s from %s /n',fullname,hits.folder);
-        
-        
+        src=fullfile(hits.folder,hits.name);        
     end 
     
 else
-%     copyfile( ...
-%         fullfile(curdir, datfile(matchIdx).name), ...
-%         fullfile(outputDir, datfile(matchIdx).name) );
     src=fullfile(curdir, datfile(matchIdx).name);
 end
 

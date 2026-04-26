@@ -12,7 +12,7 @@ function [Proportions,isEmpty]=dz_extractAcgVariables(uclu,acgfile,clu,ts)
     for ix = 1:nclu
    
        actualindex=uclu(ix);
-%        actualindex=232;
+%        actualindex=26;
 %        ix = find(uclu == actualindex);
        tst = ts(clu == actualindex);
        binSize= 0.001;%1MS
@@ -37,7 +37,7 @@ function [Proportions,isEmpty]=dz_extractAcgVariables(uclu,acgfile,clu,ts)
        
        %% check if empty 15 bins on either side
        zeroLagIndex = ceil(length(currentacg) / 2); 
-        fracZero = sum(currentacg == 0) / length(currentacg);
+       fracZero = sum(currentacg == 0) / length(currentacg);
         if fracZero > 0.5
             isEmpty(ix) = true;
             proportion= nan(1,6);

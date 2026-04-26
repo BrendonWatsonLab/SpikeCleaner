@@ -7,37 +7,37 @@ function findACGallThreshold()
 % Here we run all the threshold values in a loop and match it with the user's curation, 
 % to see at which threshold user seem to agree the most with the algorithm.
 
-% acgallsv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
-% % % %% run classifyAllUnits with different ACG thresholds
-% acgmax1=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
-% 
-% baseThresholds = { ...
-%     'mode', 'lenient', ...
-%     'maxHW', 0.8, ...
-%     'minAmp', 50, ...
-%     'maxAmp', 500, ...
-%     'minSlope', 150, ...
-%     'firingThreshold', 0.05, ...
-%     'acgallthreshold', NaN, ...
-%     'acgalllabel', 'Noise', ...
-%     'corrThreshold', 0.95 ...
-% };
-% 
-%   
-% 
-% ACGall=fullfile(pwd,'ACGall');
-% if ~exist(ACGall,'dir')
-%     mkdir(ACGall);
-% end    
-% AcgallIdx = find(strcmp(baseThresholds,'acgallthreshold')) + 1;
-% 
-% for i = 1:numel(acgmax1)
-%     baseThresholds{AcgallIdx} = acgmax1(i);     
-%     dz_classifyAllUnits(baseThresholds{:});
-%     
-%     dstFile = fullfile(ACGall, sprintf('ACGall_%0.2f.tsv', acgmax1(i)));
-%     movefile(acgallsv, dstFile);
-% end
+acgallsv=fullfile(pwd,'SpikeCleaner','cluster_Spikereasons.tsv');
+% % %% run classifyAllUnits with different ACG thresholds
+acgmax1=[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,1.1,1.2,1.3,1.4,1.5];
+
+baseThresholds = { ...
+    'mode', 'lenient', ...
+    'maxHW', 0.8, ...
+    'minAmp', 50, ...
+    'maxAmp', 500, ...
+    'minSlope', 150, ...
+    'firingThreshold', 0.05, ...
+    'acgallthreshold', NaN, ...
+    'acgalllabel', 'Noise', ...
+    'corrThreshold', 0.95 ...
+};
+
+  
+
+ACGall=fullfile(pwd,'ACGall');
+if ~exist(ACGall,'dir')
+    mkdir(ACGall);
+end    
+AcgallIdx = find(strcmp(baseThresholds,'acgallthreshold')) + 1;
+
+for i = 1:numel(acgmax1)
+    baseThresholds{AcgallIdx} = acgmax1(i);     
+    dz_classifyAllUnits(baseThresholds{:});
+    
+    dstFile = fullfile(ACGall, sprintf('ACGall_%0.2f.tsv', acgmax1(i)));
+    movefile(acgallsv, dstFile);
+end
 
 
 %% Plotting
