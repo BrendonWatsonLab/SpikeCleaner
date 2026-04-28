@@ -87,7 +87,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
     outputFileName = fullfile(outputsDir, basename + ".mat");
     outputfile     = fullfile(outputsDir, basename + "_filtered.mat");
 
- 
+%  
     if ~exist(outputfile,'file')
         [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters);  
         save(outputFileName, 'wf');
@@ -154,8 +154,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
                 continue;
             end
             
-            bestPos = pos(thisBestChannel,:);
-            
+            bestPos = pos(thisBestChannel,:);            
             d = sqrt(sum((pos - bestPos).^2,2));
             [~, idx] = sort(d);
             chRange = idx(1:min(nLocalChannels,length(idx)));
@@ -345,7 +344,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
 
 
                    case 'strict'    
-                        if any((thisProportion*100)>5)
+                        if any((thisProportion*100)>0.05)% 5%
                            flag = true;
                            disp('MUA: violation at ±2 ms bins');
                            passReason = sprintf('MUA: violation at ±2 ms bins — (%.2f%%, %.2f%%, %.2f%%, %.2f%%, %.2f%%)', ...

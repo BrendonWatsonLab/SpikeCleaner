@@ -52,6 +52,7 @@ for i=1:numel(requiredFiles)
     hits=dir(fullfile(curdir,'**',fname)); %%recursively looking inside subfolders
     if isempty(hits)
         warning('Couldnt find these files under current directory:%s',fname);
+        continue;
     end    
     %%if multiple matches are found then keep the latest
     [~,idx]=max([hits.datenum]);
@@ -59,7 +60,7 @@ for i=1:numel(requiredFiles)
     
     %%copy these files to SpikeCleaner folder
     copyfile(src,fullfile(outputDir,fname));
-    fprintf('Copied %s from %s /n',fname,hits(idx).folder);
+    fprintf('Copied %s from %s \n',fname,hits(idx).folder);
 end    
 
 %%copy the dat file as well SpikeCleaner:: just get the path

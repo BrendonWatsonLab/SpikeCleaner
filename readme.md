@@ -15,6 +15,10 @@
 
 SpikeCleaner reduces manual curation time by combining heuristic metrics (firing rate, amplitude, half-width, slope, ISI/ACG rules) with auto-labeling to flag Good / MUA / Noise clusters. It can read Kilosort outputs (.npy) files, generate curation labels along with feature metrics for each cluster compatible with Phy.
 
+Heuristically, “noise” units are those unlikely to be at all neuronal/biological in origin; “MUA” includes likely units with likely significant neural contribution (i.e., neural waveform) but with some degree of clear imperfection to be either cleaned or decided upon, and “good” units are those without any clear deviation from ideal unit criteria.  By ensuring clean and accurate selection of acceptable units, we enable robust downstream analyses such as neural decoding and longitudinal tracking of neuron identity.
+
+Our algorithm achieved an average of **97% accuracy vs. experts & 92% F1 score in classifying Single Units**. It achieved an accuracy of **97% & 92% F1 score in full-category agreement (SU, MUA, Noise)**, and **97% accuracy & 95% F1 score in distinguishing Neuronal vs. Non-Neuronal units**.
+
 ## Repository Structure
 
 ```
@@ -46,31 +50,107 @@ SpikeCleaner/
 └── readme.md
 ```
 
-## Installation
+## Installation & Use
+
+1. SpikeCleaner is a MATLAB-Based Algorithm. Hence, make sure you have a working version of MATLAB installed. 
+
+2. Clone SpikeCleaner from Github: SpikeCleaner is simple to install and  doesn't require any compilation. 
+
+- You need to run **Kilosort** before running  **SpikeCleaner**. This is compatible with all versions of **Kilosort**.
+
 - Install in your code folder.
 ```bash
 git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 ```
-## Setup
-- After running Spike Sorting, CD to  you data folder.
-- Add SpikeCleaner folder to path in MATLAB: **addpath(genpath('path'))**
-- Run **dz_runFirst**: This will create a folder for SpikeCleaner in your data folder, and copy all the necessary files in that from all the subfodlers:**dat file, spike_clusters.npy,spike_times.npy, channel_map.npy,channel_positions.npy, pc_features.npy, templates.npy, spike_templates.npy, whitening_mat.npy,whitening_mat_inv.npy,similar_templates.npy,params.py ** and creates **parameters.mat** containing information like number channels, sampling rate and animal name.
-- Run **dz_classifyUnitsAll()**.
-- Thresholds are pre-set but can be updated. We have made two versions available: **lenient** and **strict**. 
-- This will ask you the number of channels you want to consider according to your probe and shank geometry.
-- The first  time you run the code, it  is going to create mat files for filtered waveforms and ACGs,which might take some time, and then use them for every consecutive run.
+
+3. After running Spike Sorting, CD to  you data folder.
+
+4. Add SpikeCleaner folder to path in MATLAB: **addpath(genpath('path'))**
+
+5. Make sure your .dat file has the same name as of the folder: **animalname.dat** and make sure the data folder: **animalname/** has the following setup:
+
+- **animalname/animalname.dat**
+
+- **animalname/Kilosort Output Folder/** 
+
+6. The first code module to run is **dz_runFirst**:
+
+- This creates **animalname/SpikeCleaner/** in the data folder.
+
+- It will copy all the necessary files in that from all the subfolders that are required to run **SpikeCleaner**. 
+
+- Files copied: All the **.npy files** from Kilosort output folder.
+
+- It edits the **params.py** with the location of animalname.dat file acting as a pointer.
+
+- File Created: **parameters.mat** containing information like number channels, sampling rate and animal name.
+
+7. Now from inside your data folder: **animalname/** (this is your data folder) run **dz_classifyUnitsAll()**
+
+- This is the first entry point in SpikeCleaner.
+
+- This takes takes thresholds and pipeline order from users or can run default ones if user doesn't define any:
+
+-------- **pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}**
+
+-------- **dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)**
+
+- Running on default parameters:
+
+-------- **dz_classifyAllUnits()**
+
+- It asks user to enter **nLocalChannels** : The set of channels around the maximum amplitude channels to consider based on your probe and shank geometry.
+
+- This function calls **dz_Curate()** which in turn runs all the other functions of **SpikeCleaner**.
+
+- The first  time you run the code, it  is going to create mat files for filtered waveforms and ACGs in **animalname/SpikeCleaner/Outputs/**, which might take some time, and then use them for every consecutive run which will be extremely quick. 
+
+- The Outputs of a run:
+
+------ Summary Statistics tables and plots: Which contain the details about how many single units and MUAs were found, giving user an idea about the quality of data.It also gives user an idea about the steps in the pipeline and the amount of clusters/units each of teh steps discards. This can help user modify the pipeline order to make it more efficient. 
+
+8. Obtaining **Accuracy Metrics**: 
+
+- This part isn't essential for your initial run, you can use this to compare your curations with SpikeCleaner's and then optimize thersholds using **SpikeCleaner/FindThresholds** from your code folder. 
+
+- Manually curate with PHY inside the SpikeCleaner folder and then call functions for  **dz_goodVsRest(), dz_allCats(),dz_neuronalvsN()** from inside the SpikeCleaner folder, which will ask you to enter your name, it's necessary for display in PHY for you to compare between your's and SpikeCleaner's labels. It will output Metrics files in **animalname/SpikeCleaner/** : `GoodvsRest_username.tsv`,`allcat_username.tsv`&  `NvsNN_username.tsv`. They will prompt Match/No Match between your's and SpikeCleaners labelling and will also be imported in PHY and can be used to navigate and sort the units.
+
 - To be able to  run the comparison codes in  **AccuracyMetrics**, manually curate with PHY in SpikeCleaner folder and then call functions for  **dz_goodVsRest(), dz_allCats(),dz_neuronalvsN()** from inside the SpikeCleaner folder, which will ask you to enter your name, it's necessary for display in PHY for you to compare between your's and SpikeCleaner's labels. It will output Metrics files which will prompt Match/No Match between your's and SpikeCleaners labelling and which will also be imported in PHY and can be used to navigate.
+
+- This will also export tables of accuracy metrics (Accuracy,Precision,Recall & F1) in **animalname/SpikeCleaner/Accuracy**: - `neuronalVsNN_summary_username.png`,`goodVsRest_summary_username.png`& `allcat_summary_username.png`
+
+9. Customizing Thresholds:
+
+- This part isn't essential for your initial run which can be done using default thersholds
+
+- You will need to run these set of codes if Accuracy Metrics obtained aren't great, that is the default thresholds aren't working very well for your data.
+
+- These set of codes are available in : **SpikeCleaner/FindThresholds** in your code folder and can be used to optimize thresholds.
+
 - To be able to run codes from **FindThresholds** , manually curate with PHY in SpikeCleaner folder and then call functions for  **findCorrelationThreshold(),findAmplitudeThreshold(), findHalfWidthThreshold(),findSlopeThreshold(),findACGallThreshold()** from your main animal folder.
+
+- These functions create outputs in **animalname/**: 
+
+--------**animalname/Correlation/**: Containing outputs of SpikeCleaner for differnt runs of differnet thersholds and the final plot of %Match between user and the algorithm.
+
+--------**animalname/Amplitude/**: Containing outputs of SpikeCleaner for differnt runs of differnet thersholds and the final plot of %Match between user and the algorithm.
+
+--------**animalname/HalfWidth/**: Containing outputs of SpikeCleaner for differnt runs of differnet thersholds and the final plot of %Match between user and the algorithm.
+
+--------**animalname/Slope/**: Containing outputs of SpikeCleaner for differnt runs of differnet thersholds and the final plot of %Match between user and the algorithm.
+
+--------**animalname/ACGall/**: Containing outputs of SpikeCleaner for differnt runs of differnet thersholds and the final plot of %Match between user and the algorithm.
+
+10. After running the **SpikeCleaner/FindThresholds**  and obtaining the optimal thersholds use those values to call **dz_classifyAllUnits**
+
+-------- **pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}**
+
+-------- **dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)**
 
 ## Dependencies & Requirements
 
 ### Inputs
-- `spike_clusters.npy` (Output from Kilosort)
-- `spike_times.npy` (Output from Kilosort)
-- `channel_positions.npy` (Output from Kilosort)
-- `channel_map.npy` (Output from Kilosort)
-- `spike_templates.npy` (Output from Kilosort)
-- `templates.npy` (Output from Kilosort)
+- All npy files from **Kilosort** Output Folder.
 - `parameters.mat` (Output from dz_runFirst())
 - `cluster_group.tsv` (PHY manual curation labels)
 
@@ -178,21 +258,21 @@ This would give you an idea of which step is evicting most clusters and can be d
 
 **Figure1: Survival Curve**
 
-<img src="Figures/SpikeCleaner_survival_curve.svg" width="800">
+<img src="Figures/SpikeCleaner_survival_curve.svg" width="500">
 
 Gives us the percentage of units survived after each step, plotted againts that step label.
 
 
 **Figure2: Radar Plot-Good+MUA (Biological Clusters):** 
 
-<img src="Figures/SpikeCleaner_NeuronalRadar.svg" width="800">
+<img src="Figures/SpikeCleaner_NeuronalRadar.svg" width="500">
 
 Percentage of noisy clusters removed at each step of the SpikeCleaner pipeline. The correlation-based filter removes the largest fraction of non-neuronal clusters, while waveform-shape metrics (amplitude, half-width, slope) and ACG-based criteria contribute smaller incremental refinements. This indicates that cross-channel similarity is the dominant signature of noise in the dataset.
 
 
 **Figure3: Radar Plot-Good/Single Units**
 
-<img src="Figures/SpikeCleaner_noise+muaRadar.svg" width="800">
+<img src="Figures/SpikeCleaner_noise+muaRadar.svg" width="500">
 
 Percentage of noise and multi-unit activity (MUA) clusters removed at each step of the SpikeCleaner pipeline during isolation of single units. The MUA rejection step accounts for the largest reduction, while correlation filtering provides an earlier coarse separation of non-physiological clusters. Waveform-shape and ACG-based criteria contribute smaller refinements.
 
@@ -276,10 +356,13 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 
 **Figure10: PHY View: Autocorrelogram Classification: It uses shoulder peaks to get the proportions of violations in the center.**
 
-![PHY View](Figures/acgclassification.png)
+<img src="Figures/acgclassification.png" width="300">
 
-**Figure11: PHY View: Depicts the view in PHY after importing results from SpikeCleaner.
-![PHY View](Figures/phyview.png)
+
+
+**Figure11: PHY View: Depicts the view in PHY after importing results from SpikeCleaner.**
+
+<img src="Figures/phyview.png" width="800">
 
 **Figure12: Journey to Acceptance:Shows implementations of all the thresholding rules consecutively to obtain Single Units.**
 ![Journey to Acceptance](Figures/JOURNEYTOACCEPTANCE.svg)
@@ -287,7 +370,6 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 ## Metrics of Match with Expert Users
 
 **Rodents-Grass Rats:** Harald,Hafdan,Canute 
-
 **Neural Recording Information:**
 
 Recording Size: 102 GB
@@ -298,7 +380,7 @@ Sampling Rate: 20KHz
 
 Calculated Time: ~5.5 hours long.
 
-**Results were averaged over 2 experts and 3 data sets:**
+**Results were averaged over 2 experts and 3 datasets:**
 
 **Figure13: Metrics Single Units Vs Rest between the algorithm and experts users**
 ![Accuracy Metrics](Figures/SPIKECLEANER-ACCURACYSTATS.svg)
@@ -308,6 +390,8 @@ Calculated Time: ~5.5 hours long.
 Special thanks to  the expert curators: Dr. Brendon Watson & Dr. Jeremiah Hartner.
 
 This work builds on open-source tools such as [Kilosort](https://github.com/MouseLand/Kilosort) and [Phy](https://github.com/cortex-lab/phy).
+
+
 
 
 
