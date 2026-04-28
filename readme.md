@@ -4,10 +4,10 @@
 
 ## Contributors
 - Diksha Zutshi
-- David Kim  
-- Dr. Jeremiah Hartner
 - Dr. Daniil Berezhnoi
 - Anjesh Ghimire
+- Dr. Jeremiah Hartner
+- David Kim
 - Dr. Brendon O Watson
 
 
