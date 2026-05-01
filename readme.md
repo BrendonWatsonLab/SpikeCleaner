@@ -91,15 +91,17 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 
 - This takes takes thresholds and pipeline order from users or can run default ones if user doesn't define any:
 
--------- **pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}**
+-------- SpikeCleaner will output a `animalname_SpikeCleaner_settings.json` file with the parameters and thersholds and the date and time of the run.
 
--------- **dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)**
+-------- Users can create SpikeCleaner_settings.json file or edit the previously created by SpikeCleaner.
+
+-------- Rename the `animalname_SpikeCleaner_settings.json` in `dz_classifyAllUnits()` line 33. So the algorithm knows which file to look for.
+
+-------- Save this file in the **animalname/SpikeCleaner/**
 
 - Running on default parameters:
 
 -------- **dz_classifyAllUnits()**
-
-- It asks user to enter **nLocalChannels** : The set of channels around the maximum amplitude channels to consider based on your probe and shank geometry.
 
 - This function calls **dz_Curate()** which in turn runs all the other functions of **SpikeCleaner**.
 
@@ -145,7 +147,6 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 
 -------- **pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}**
 
--------- **dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)**
 
 ## Dependencies & Requirements
 
@@ -218,8 +219,9 @@ acgallthreshold=1;% 100% : threshold for all the center bins compared to the sho
 : Otherwise Noise/MUA
 
 **You can provide the pipeline flow and thresholds:**
+
+Inside `animalname_SpikeCleaner_settings.json` : Edit pipeline and thersholds
 pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}            
-dz_classifyAllUnits('mode','strict/lenient','maxHW',0.8,...,'pipeline'=pipeline)
 
 ### Core Processing (`dz_Curate.m`)
 This is the first function that is called upon:
@@ -236,11 +238,11 @@ highest amplitude channel, also saves highest amplitude waveform channel, highes
 
 a.  **Low Firing Rate Evaluation**: Internally calls `dz_evaluateLowFiringRates` to check whether clusters fire below the biologically plausible threshold and flag them as Noise
 
-b. **Waveform Correlation Evaluation**: Internally calls `dz_analyzeCorrelation` to check whether maximum amplitude channel and 10 closest channels to it in position, have <80% channels that have > **correlationthreshold** correlation coefficient. If clusters don't pass the check that means waveforms look too similar in all the considered channels, biologically plausible waveforms decrease in amplitude away from maximum amplitude channel. Hence we flag that cluster as Noise.
+b. **Waveform Correlation Evaluation**: Internally calls `dz_analyzeCorrelation` to check whether maximum amplitude channel and channels that are closer than 150 microns to it in position, have <80% channels that have > **correlationthreshold** correlation coefficient. If clusters don't pass the check that means waveforms look too similar in all the considered channels, biologically plausible waveforms decrease in amplitude away from maximum amplitude channel. Hence we flag that cluster as Noise.
 
 c. **Waveform Amplitude Evaluation**: Internally calls `dz_analyzeAmplitude` to check: 
 1. If the maximum amplitude channel has amplitude > **minAmp**
-2. If in the selected waveform range: (Maximum amplitude waveform and 10 closest channels in position to it), any channel has > **maxAmp** difference with the maximum amplitude channel. Biological clusters have a maximum amplitude waveform and decreasing amplitude channels in both sides of the maximum channel. As the amplitude decreases by the factor of 1/r^2 as the distanse of electrode increases from the neuron. Clusters which only have a huge maximum amplitude channel and no activity in channels above and below it are not biological and hence would be flagged as Noise.
+2. If in the selected waveform range: (Maximum amplitude waveform and channels that are closer than 150 microns in position to it), any channel has > **maxAmp** difference with the maximum amplitude channel. Biological clusters have a maximum amplitude waveform and decreasing amplitude channels in both sides of the maximum channel. As the amplitude decreases by the factor of 1/r^2 as the distanse of electrode increases from the neuron. Clusters which only have a huge maximum amplitude channel and no activity in channels above and below it are not biological and hence would be flagged as Noise.
 
 d. **Waveform Half Width Evaluation**: Internally calls `dz_analyzeHalfWidth` to check the half width of the maximum amplitude waveform. Half Width is calculated using the half amplitude points on both sides on the waveform. Too large of a halfwidth isn't biologically plausible. This function compares and checks if the present half width < **maxHW**, otherwise flags the cluster as Noise.
 
@@ -370,6 +372,7 @@ All MAT file outputs (`datfilename.mat`, `datfilename_filtered.mat`, `datfilenam
 ## Metrics of Match with Expert Users
 
 **Rodents-Grass Rats:** Harald,Hafdan,Canute 
+
 **Neural Recording Information:**
 
 Recording Size: 102 GB

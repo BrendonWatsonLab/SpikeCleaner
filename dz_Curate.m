@@ -1,5 +1,5 @@
 %%%By Diksha Zutshi--modified for chenaging tetsing order
-function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
+function dz_Curate(basename,datfil, clufile,thresholds,pipeline)
         
     %%Algorithm flow:
     %1 Check for firing rate for non-biological clusters-noise
@@ -103,7 +103,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
     activeChannelsUsed= wfdata.activeChannelsUsed;
     corrCell=cell(nclu, 1);
     %% Extracting 3 point waveform and waveform features
-    [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos,nLocalChannels);  
+    [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos);  
     
     %% Extracting ACG proportions
     acgfile = fullfile(outputsDir, basename + "acg.mat");
@@ -140,8 +140,9 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
     end
    
     %% correlation
-    function dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos,nLocalChannels)
+    function dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos)
         bestWaveformsChannel=wfdata.bestWaveformsChannel;
+        maxDistanceUm = 150;   % use channels within 150 microns
         for ix=1:wfs
 %             actualindex=41;
 %             ix = find(uclu == actualindex);
@@ -156,11 +157,13 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
             
             bestPos = pos(thisBestChannel,:);            
             d = sqrt(sum((pos - bestPos).^2,2));
-            [~, idx] = sort(d);
-            chRange = idx(1:min(nLocalChannels,length(idx)));
-            %chRange = idx(1:11);   % best channel + 10 neighbors      
+            %using 150 microns
+             % channels within 150 um, including best channel
+            chRange = find(d <= maxDistanceUm);   
+            % get local correlations
             localCorrValues = corrValues(chRange);
-            localCorrValues=localCorrValues(2:end);
+            % remove self-channel
+            localCorrValues(chRange == thisBestChannel) = [];
             totalChannels = length(localCorrValues);
             numHighCorr = sum(localCorrValues > correlationthreshold);
             percentHighCorr = (numHighCorr / totalChannels) * 100;
@@ -344,7 +347,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
 
 
                    case 'strict'    
-                        if any((thisProportion*100)>0.05)% 5%
+                        if any((thisProportion*100)>5)% 5%
                            flag = true;
                            disp('MUA: violation at ±2 ms bins');
                            passReason = sprintf('MUA: violation at ±2 ms bins — (%.2f%%, %.2f%%, %.2f%%, %.2f%%, %.2f%%)', ...
@@ -394,7 +397,7 @@ function dz_Curate(basename,datfil, clufile,thresholds,pipeline,nLocalChannels)
                 radarLabels{k} = 'Low Firing';
 
             case 'correlation'               
-                 dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos,nLocalChannels);
+                 dz_analyzeCorrelation(wfs, channelCorrelations,wfdata,pos);
                  radarLabels{k} = 'Correlation';
 
             case 'amplitude'  

@@ -1,5 +1,5 @@
 %% extract waveform variables
-function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos,nLocalChannels)  
+function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,chRangeAmp]=dz_extractWfVariables(wfdata,uclu,fs,good,noiseReasons,Reasons,pos)  
 
 
     %extracting the waveforms::: in uV
@@ -16,6 +16,7 @@ function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,c
     amplitudes = cell(nclu, 1);%to save all the acgs
     spikeType=cell(nclu, 1);
     chRangeAmp=cell(nclu,1);
+    maxDistanceUm=150;%microns
     
     for ix = 1:wfs
             
@@ -49,9 +50,9 @@ function [amplitudes,halfwidths,slopes,spikeType,wfs,good,noiseReasons,Reasons,c
         %getting near by channels:
         bestPos = pos(bestCh,:);           
         d = sqrt(sum((pos - bestPos).^2,2));
-        [~, idx] = sort(d);
-        chRange = idx(1:nLocalChannels); 
+        chRange = find(d <= maxDistanceUm);   
         chRangeWaveforms=waveforms(:,chRange);
+
         
  
         %%%%Checking just for best wf to begin with
