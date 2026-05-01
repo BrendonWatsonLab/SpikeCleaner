@@ -145,8 +145,6 @@ git clone https://github.com/BrendonWatsonLab/SpikeCleaner.git
 
 10. After running the **SpikeCleaner/FindThresholds**  and obtaining the optimal thersholds use those values to call **dz_classifyAllUnits**
 
--------- **pipeline={'lowFiring','correlation','amplitude','halfWidth','slope','acgEmpty','acgAll','mua'}**
-
 
 ## Dependencies & Requirements
 
