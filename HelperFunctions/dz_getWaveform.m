@@ -16,9 +16,20 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
     dattype = input(['Please type:\n' ...
                  '1 ? Raw int16 ADC counts (.dat)\n' ...
                  '2 ? Voltage format (µV)\n']);
-   
-    % Parameters for waveform extraction
-    
+             
+    if dattype == 1
+        isIntan = input(['Was this file recorded using Intan hardware?\n' ...
+                         '1 = Yes\n' ...
+                         '0 = No\n']);
+
+        if isIntan == 1
+            conversionFactor = 0.195;  % Intan amplifier.dat: uV/bit
+            fprintf('Using Intan conversion factor: 0.195 uV/bit\n');
+        else
+            conversionFactor = input('Enter the conversion factor of your recording system in uV/bit: ');
+        end
+    end   
+    % Parameters for waveform extraction    
     uclu=unique(clu);
     nClusters=length(uclu);% Number of clusters
 
@@ -85,12 +96,10 @@ function [wf] = dz_getWaveform(datfil, clu, ts, clustersToCheck,parameters)
             fseek(fid, (startIdx - 1) * nChannels * 2, 'bof');
             rawBlock = fread(fid, [nChannels, numSamplesToRead], 'int16')';
             extractedData = rawBlock;
-            if dattype==1
-                extractedData=0.195 * (extractedData - 32768); % units = microvolts ; conversion from int16 to uV             
+            if dattype==1 
+                extractedData=conversionFactor * double(extractedData); % units = microvolts ; conversion from int16 to uV          
             end    
-            
-
-            
+                     
             % Apply padding to keep the size consistent
             extractedSize = size(extractedData, 1);  % Size of the extracted data
             
